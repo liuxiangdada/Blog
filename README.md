@@ -8,6 +8,8 @@
 
 [JS常用方法实现](https://github.com/liuxiangdada/blog/issues/2)
 
+[JS内存机制](https://github.com/liuxiangdada/blog/issues/4)
+
 
 ## Leetcode题解
 
