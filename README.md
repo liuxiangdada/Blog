@@ -1,5 +1,5 @@
 # blog
-技术文章、读书笔记、生活随想，截至目前更新了6篇文章
+技术文章、读书笔记、生活随想，截至目前更新了7篇文章
 
 ## JS
 
@@ -10,6 +10,8 @@
 [JS内存机制](https://github.com/liuxiangdada/blog/issues/4)
 
 [JS事件循环EventLoop（浏览器）](https://github.com/liuxiangdada/blog/issues/5)
+
+[JS事件循环EventLoop（Node）](https://github.com/liuxiangdada/blog/issues/7)
 
 
 ## Leetcode题解
