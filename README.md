@@ -6,7 +6,7 @@
 
 如果以后文章多了不好维护会考虑搬到单独的服务器上
 
-截至目前已经更新了7篇文章
+截至目前已经更新了8篇文章
 
 ## JS
 
@@ -26,3 +26,5 @@
 [圆圈中最后剩下的数字](https://github.com/liuxiangdada/blog/issues/3)
 
 [排序数组](https://github.com/liuxiangdada/blog/issues/6)
+
+[有效括号的嵌套深度](https://github.com/liuxiangdada/blog/issues/8)
