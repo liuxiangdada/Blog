@@ -28,3 +28,5 @@
 [排序数组](https://github.com/liuxiangdada/blog/issues/6)
 
 [有效括号的嵌套深度](https://github.com/liuxiangdada/blog/issues/8)
+
+[生命游戏](https://github.com/liuxiangdada/blog/issues/9)
