@@ -6,7 +6,7 @@
 
 如果以后文章多了不好维护会考虑搬到单独的服务器上
 
-截至目前已经更新了12篇文章
+截至目前已经更新了13篇文章
 
 ## JS
 
@@ -21,6 +21,8 @@
 [JS事件循环EventLoop（Node）](https://github.com/liuxiangdada/blog/issues/7)
 
 [Promise实现](https://github.com/liuxiangdada/blog/issues/10)
+
+[JS异步](https://github.com/liuxiangdada/blog/issues/13)
 
 
 ## Leetcode题解
