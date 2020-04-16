@@ -6,6 +6,16 @@
 
 如果以后文章多了不好维护会考虑搬到单独的服务器上
 
+# 文章分类
+
+## 前端
+
+[JS](https://github.com/loofk/blog/JS/index.md)
+
+## 练习
+
+[Leetcode题解](https://github.com/loofk/blog/Leetcode/index.md)
+
 
 
 
