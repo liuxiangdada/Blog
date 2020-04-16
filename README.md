@@ -6,7 +6,7 @@
 
 如果以后文章多了不好维护会考虑搬到单独的服务器上
 
-截至目前已经更新了14篇文章
+截至目前已经更新了15篇文章
 
 ## JS
 
@@ -40,3 +40,7 @@
 [旋转矩阵](https://github.com/liuxiangdada/blog/issues/12)
 
 [机器人的运动范围](https://github.com/liuxiangdada/blog/issues/14)
+
+### 动态规划合集
+
+[最长回文子串](https://github.com/liuxiangdada/blog/issues/15)
