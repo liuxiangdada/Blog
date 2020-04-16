@@ -10,11 +10,11 @@
 
 ## 前端
 
-[JS](https://github.com/loofk/blog/JS/index.md)
+[JS](https://github.com/loofk/blog/blob/master/JS/index.md)
 
 ## 练习
 
-[Leetcode题解](https://github.com/loofk/blog/Leetcode/index.md)
+[Leetcode题解](https://github.com/loofk/blog/blob/master/Leetcode/index.md)
 
 
 
