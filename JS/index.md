@@ -8,6 +8,6 @@
 
 [JS事件循环EventLoop（Node）](https://github.com/loofk/blog/blob/master/JS/docs/JS%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AFNodeJS%E7%89%88.md)
 
-[Promise实现](https://github.com/liuxiangdada/blog/issues/10)
+[Promise实现](https://github.com/loofk/blog/blob/master/JS/docs/Promise%E5%AE%9E%E7%8E%B0.md)
 
 [JS异步](https://github.com/loofk/blog/blob/master/JS/docs/JS%E5%BC%82%E6%AD%A5.md)
