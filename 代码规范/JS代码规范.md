@@ -434,6 +434,28 @@ module.exports = {
 
 该文件用于编写代码时的规范，即在编写时告诉编辑器以什么规范辅助编码，主要可以实现 `tab` 或 `space` 缩进，换行缩进的空格数等一些基础的规范，通常配合 `eslint`一起确保项目在团队合作时风格统一
 
+下面是我的配置：
+
+```
+root = true
+
+[*]
+indent_style = space
+indent_size = 2
+
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{js,html,blade.php,css,scss,vue,json}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+```
+
 ### VS Code Settings
 
 我们这里以 `VS Code` 为例，首先去插件市场安装 `eslint` 插件，要想 `eslint` 生效，还必须修改编辑器的 `settings.json` 文件：
