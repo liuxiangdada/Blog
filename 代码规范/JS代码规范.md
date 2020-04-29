@@ -377,7 +377,6 @@ plugins: ["html", "vue"],
 ```
 module.exports = {
   root: true,
-  parser: "vue-eslint-parser",
 
   parserOptions: {
     parser: "babel-eslint",
@@ -492,7 +491,7 @@ npm i yorkie -D
 
 这样在提交之前就会自动校验文件是否符合 `eslint` 规范并自动修复一些可选项，这里有个问题，就是我们的文件已经被提交到暂存区了，如果又被修复，新的修改不会被添加到暂存区
 
-我们还需要引入 `lint-staged` 来执行多件事，比如帮我们把上面的修复文件提交到暂存区，校验其他文件等
+我们还需要引入 `lint-staged` 来处理暂存区的文件，比如帮我们把上面的修复文件提交到暂存区，校验其他类型文件等
 
 安装 `lint-staged` 
 ```
