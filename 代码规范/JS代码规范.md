@@ -72,13 +72,13 @@
     ```
     let message = 'hello, ' + name + '!'
     ```
-11. 逗号：对象或数组不允许有行末逗号；逗号后面要留空格（eslint：comma-spacing、comma-dangle）
+12. 逗号：对象或数组不允许有行末逗号；逗号后面要留空格（eslint：comma-spacing、comma-dangle）
     ```
     let arr = [1, 2, 3, 4]
 
     let obj = { name: 'John', age: 12 }
     ```
-10. 始终将逗号置于行末（eslint：comma-style）
+13. 始终将逗号置于行末（eslint：comma-style）
       ```
       let obj = {
         foo: 'foo',
@@ -90,7 +90,7 @@
         ,bar: 'bar'  // ×
       }
       ```
-11. 点号：点号操作符必须始终与属性保持在同一行（eslint：dot-location）
+14. 点号：点号操作符必须始终与属性保持在同一行（eslint：dot-location）
       ```
       console
       .log('hello')   // √
@@ -98,7 +98,7 @@
       console.
       log('hello')    // ×
       ```
-12. 条件：`else` 关键字要和花括号保持在同一行（eslint：brace-style）
+15. 条件：`else` 关键字要和花括号保持在同一行（eslint：brace-style）
       ```
       if (condition) {
 
@@ -106,7 +106,7 @@
 
       }
       ```
-13. 多行 `if` 语句的花括号不能省（eslint：curly）
+16. 多行 `if` 语句的花括号不能省（eslint：curly）
       ```
       if (condition) console.log('hello')
 
@@ -115,7 +115,7 @@
         console.log('world')
       }
       ```
-14. 条件语句中的赋值语句使用括号包裹，避免误认为将全等号漏写（eslint：no-cond-assign）
+17. 条件语句中的赋值语句使用括号包裹，避免误认为将全等号漏写（eslint：no-cond-assign）
       ```
       if ((val = text.match(expr))) {
 
@@ -125,7 +125,7 @@
 
       }
       ```
-15. 多行空行：允许单行空行，但不允许多行空行（eslint：no-multiple-empty-lines）
+18. 多行空行：允许单行空行，但不允许多行空行（eslint：no-multiple-empty-lines）
       ```
       // √
       let value = 'hello world'
@@ -138,7 +138,7 @@
 
       console.log(value)
       ```
-16. 三目运算符：简短的一行，长的保持 `?` 和 `:` 与他们所负责的代码同行（eslint：operator-linebreak）
+19. 三目运算符：简短的一行，长的保持 `?` 和 `:` 与他们所负责的代码同行（eslint：operator-linebreak）
       ```
       let location = env.development ? 'localhost' : 'www.api.com'
 
@@ -146,17 +146,19 @@
         ? 'localhost' 
         : 'www.api.com'
       ```
-17. 代码块：单行代码块两边加空格（eslint：block-spacing）
+20. 代码块：单行代码块两边加空格（eslint：block-spacing）
       ```
-      function foo () { return true }
+      function foo () { return true }   √
+
+      function foo () {return true}    ×
       ```
-18. 命名：变量和函数命名统一使用驼峰命名法（eslint：camelcase）
+21. 命名：变量和函数命名统一使用驼峰命名法（eslint：camelcase）
     ```
     function my_function () {}   √
 
     function myFunction () {}    ×
     ```
-19. 取值器：对象中定义了存值器，一定要定义与之对应的取值器（eslint：accessor-pairs）
+22. 取值器：对象中定义了存值器，一定要定义与之对应的取值器（eslint：accessor-pairs）
     ```
     // √
     let person = {
@@ -175,7 +177,7 @@
       }
     }
     ```
-20. 子类的构造器中一定要使用 `super`（eslint：constructor-super）
+23. 子类的构造器中一定要使用 `super`（eslint：constructor-super）
     ```
     class Dog extends Animal {
       constructor () {
@@ -183,13 +185,13 @@
       }
     }
     ```
-21. 不对变量使用 `delete` 操作（eslint：no-delete-var）
+24. 不对变量使用 `delete` 操作（eslint：no-delete-var）
     ```
     let name
 
     delete name   // ×
     ```
-22. 同一模块多个导入时一次性写完（eslint：no-duplicate-imports）
+25. 同一模块多个导入时一次性写完（eslint：no-duplicate-imports）
     ```
     import { myFunc1, myFunc2 } from 'module'     // √
 
@@ -197,7 +199,7 @@
 
     import { myFunc2 } from 'module'              // ×
     ```
-23. `switch` 使用 `break` 来将条件分支正常中断（eslint：no-fallthrough）
+26. `switch` 使用 `break` 来将条件分支正常中断（eslint：no-fallthrough）
     ```    
     switch (filter) {
       case 1:
@@ -215,25 +217,25 @@
         doSomethingElse()
     }                            // ×
     ```
-24. 不省略小数点前面的0（eslint：no-floating-decimal）
+27. 不省略小数点前面的0（eslint：no-floating-decimal）
     ```
     const discount = 0.5    // √
 
     const discount = .5     // ×
     ```
-25. `eval`：避免使用`eval`；注意隐式的`eval`（eslint：no-eval、no-implied-eval）
+28. `eval`：避免使用`eval`；注意隐式的`eval`（eslint：no-eval、no-implied-eval）
     ```
     const res = eval('a + b')              // ×
 
     setTimeout("alert('hello world')")     // ×，带有隐式eval
     ```
-26. 嵌套的代码块禁止再定义函数（eslint：no-inner-declarations）
+29. 嵌套的代码块禁止再定义函数（eslint：no-inner-declarations）
     ```
     if (condition) {
       function setAuther () {}   // ×
     }
     ```
-27. `return` 语句中的赋值必须有括号包裹（eslint：no-return-assign）
+30. `return` 语句中的赋值必须有括号包裹（eslint：no-return-assign）
     ```
     function sum (a, b) {
       return (result = a + b)
@@ -243,13 +245,13 @@
       return result = a + b
     }                           // ×
     ```
-28. 代码块首尾留空格（eslint：space-before-blocks）
+31. 代码块首尾留空格（eslint：space-before-blocks）
     ```
     if (condition) { ... }      // √
 
     if (condition){ ... }       // ×
     ```
-29. 注释首尾留空格（eslint：spaced-comment）
+32. 注释首尾留空格（eslint：spaced-comment）
     ```
     // commit     // √
     //commit      // ×
@@ -257,7 +259,7 @@
     /*comment*/         // ×
     /* comment */       // √
     ```
-30. 检查 `NaN` 的正确姿势是使用 `isNaN()`（eslint：use-isnan）
+33. 检查 `NaN` 的正确姿势是使用 `isNaN()`（eslint：use-isnan）
     ```
     if (isNaN(price)) { }   // √
 
@@ -311,24 +313,33 @@ plugins: ["html", "vue"],
 module.exports = {
   root: true,
   parser: "vue-eslint-parser",
+
   parserOptions: {
     parser: "babel-eslint",
     sourceType: "module",
     //ignore eslint error: 'import' and 'export' may only appear at the top level
     allowImportExportEverywhere: true
   },
+
   env: {
     browser: true,
     node: true,
     es6: true
   },
-  globals: {},
+
+  globals: {
+    Atomics: "readonly",
+    SharedArrayBuffer: "readonly",
+  },
+
   extends: [
     "eslint:recommended",
     "plugin:vue/essential"
   ],
+
   // required to lint *.vue files
   plugins: ["html", "vue"],
+
   // add your custom rules here
   // off: 0, warn: 1, error: 2
   rules: {
@@ -341,7 +352,7 @@ module.exports = {
     "no-multiple-empty-lines": 2, // forbidden mutilple empty lines
     "no-empty": 0,
     "new-cap": 2, // constructor function's first letter should be capital
-    "eqeqeq": 2, // ===
+    "eqeqeq": 2, // use '===' instead '=='
     "no-cond-assign": 2, // forbidden assign in condition
     'no-useless-escape': 0,
     "generator-star-spacing": 0, // allow async-await
@@ -361,7 +372,7 @@ module.exports = {
 
 ### VS Code Settings
 
-我们这里以 `VS Code` 为例，我们要想 `eslint` 生效，必须配置编辑器的 `settings.json` 文件：
+我们这里以 `VS Code` 为例，首先去插件市场安装 `eslint` 插件，要想 `eslint` 生效，还必须修改编辑器的 `settings.json` 文件：
 ```
 // 配置eslint的校验文件类型
 "eslint.validate": [
@@ -372,7 +383,7 @@ module.exports = {
   "vue"
 ],
 
-// 保存时让编辑器按eslint的规则格式化文件
+// 保存时让编辑器按eslint的规则格式化文件，可不要
 "editor.codeActionsOnSave": {
   "source.fixAll.eslint": true
 }
@@ -385,7 +396,7 @@ module.exports = {
   "scripts": {
     ...
 
-    "eslint": "eslint src tests",
+    "lint": "eslint src tests",
     "format": "eslint src tests --fix"
   },
 ```
@@ -393,3 +404,82 @@ module.exports = {
 其中 `eslint` 后面紧跟的是需要校验的文件范围，`--fix` 参数表示主动修正一些不符合规范的语法
 
 ## GitHook提交检查钩子配置
+
+对于团队合作而言，代码规范可能不会被每个人遵守，为确保提交到服务器的代码不存在坏代码，我们需要在 `git commit` 之前对文件进行校验
+
+`git` 提供了各个阶段的钩子供开发者使用，我们这里使用名为 `pre-commit` 的钩子
+
+首先需要安装 `yorkie`
+
+```
+npm i yorkie -D
+```
+
+它是尤大根据 `husky` 改写的 `pre-commit` 钩子包，能够从 `package.json` 中读取 `gitHooks` 属性
+
+接着配置 `package.json` 文件
+```
+"gitHooks": {
+  "pre-commit": "npm run format",
+  "commit-msg": "node scripts/verify-commit-msg.js"
+},
+```
+
+这样在提交之前就会自动校验文件是否符合 `eslint` 规范并自动修复一些可选项，这里有个问题，就是我们的文件已经被提交到暂存区了，如果又被修复，新的修改不会被添加到暂存区
+
+我们还需要引入 `lint-staged` 来执行多件事，比如帮我们把上面的修复文件提交到暂存区，校验其他文件等
+
+安装 `lint-staged` 
+```
+npm install lint-staged -D
+```
+
+重写配置文件
+```
+"gitHooks": {
+  "pre-commit": "lint-staged",
+  "commit-msg": "node scripts/verify-commit-msg.js"
+},
+"lint-staged": {
+  "*.{js,vue}": [
+    "eslint --fix",
+    "git add"
+  ],
+  "*.scss": [
+    "stylelint --fix --syntax scss",
+    "prettier --write",
+    "git add"
+  ]
+}
+```
+
+上面有注意到，我们在 `gitHooks` 中还增加了一个 `commit-msg` 钩子，用于规范提交注释，格式类似于：
+```
+feat(compiler): add 'comments' option
+```
+
+其他具体细则参考 [conventional-changelog](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular)
+
+如果需要进一步规范的话，可以使用 `git-cz` 代替 `git commit`，首先安装包：
+```
+npm install commitizen cz-conventional-changelog -D
+```
+
+接着修改 `package.json` 文件
+```
+  "scripts": {
+    ...
+
+    "lint": "eslint src tests",
+    "format": "eslint src tests --fix"
+    "commit": "git-cz"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+```
+
+之后，在 `git add` 后运行 `npm run commit` 就可以根据步骤依次填写提交注释了
+
