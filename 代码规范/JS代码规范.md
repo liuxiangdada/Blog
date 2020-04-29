@@ -9,18 +9,23 @@
 ## 细则
 
 1. 缩进：使用两个空格缩进（eslint：indent）
+   
    ```
    function hello () {
      console.log('hello')
    }
    ```
+
 2. 引号：除需要转义的情况，字符串统一使用单引号（eslint：quotes）
+   
    ```
    console.log('hello')
 
    $("<div class = 'box'></div>")
    ```
+
 3. 分号：除开可能导致上下行解析问题的5个`token`：括号、方括号、正则开头的斜杆、加号、减号，语句末尾不带分号，一般来说在开头是括号或方括号时在行首加上分号（eslint：semi）
+   
    ```
    let a = name
 
@@ -28,57 +33,77 @@
      console.log('hello world')
     })('John')
    ```
+
 4. 冒号：键值对中，冒号和值之间留间隔（eslint：key-spacing）
+   
    ```
    let obj = { key: val, key2: val2 }
    ```
+   
 5. 未使用变量：如果一个变量在作用域内未被使用，则不需要定义（eslint：no-unused-vars）
+   
    ```
    function myFunction () {
      let unusedVar = something() // × unused
    }
    ```
+
 6. 关键字空格：语言囊括的关键字后面要添加空格（eslint：keyword-spacing）
+   
    ```
    if (condition) { ... }   // √
 
    if(condition) { ... }    // ×
    ```
+
 7. 函数声明：函数名字和括号之间加空格；括号与后面的花括号之间加空格（eslint：space-before-function-paren）
+   
    ```
    function name (arguments) { ... }   // √
 
    function name(arguments){ ... }     // ×
    ```
+
 8. 函数调用：调用时函数名和括号之间不留间隔（eslint：func-call-spacing）
+   
    ```
    console.log('hello')    // √
 
    console.log ('hello')   // ×
    ```
-9. 构造函数：构造函数首字母大写（eslint：new-cap）
+
+9.  构造函数：构造函数首字母大写（eslint：new-cap）
+    
     ```
     function Animal () {}
 
     let dog = new Animal()
     ```
+
 10. 等号：始终使用 `===` 而不是 `==` ，特殊情况如检查变量是否为 `null` 或 `undefined`（eslint：eqeqeq）
+    
     ```
     if (name === 'John')
 
     if (name !== 'Tom')
     ```
+
 11. 字符串拼接：字符串拼接时通常使用 `+` 符号，其前后应留空格（eslint：space-infix-ops）
+    
     ```
     let message = 'hello, ' + name + '!'
     ```
+
 12. 逗号：对象或数组不允许有行末逗号；逗号后面要留空格（eslint：comma-spacing、comma-dangle）
+    
     ```
     let arr = [1, 2, 3, 4]
 
     let obj = { name: 'John', age: 12 }
     ```
+
 13. 始终将逗号置于行末（eslint：comma-style）
+    
       ```
       let obj = {
         foo: 'foo',
@@ -90,7 +115,9 @@
         ,bar: 'bar'  // ×
       }
       ```
+
 14. 点号：点号操作符必须始终与属性保持在同一行（eslint：dot-location）
+    
       ```
       console
       .log('hello')   // √
@@ -98,7 +125,9 @@
       console.
       log('hello')    // ×
       ```
+
 15. 条件：`else` 关键字要和花括号保持在同一行（eslint：brace-style）
+    
       ```
       if (condition) {
 
@@ -106,7 +135,9 @@
 
       }
       ```
+
 16. 多行 `if` 语句的花括号不能省（eslint：curly）
+    
       ```
       if (condition) console.log('hello')
 
@@ -115,7 +146,9 @@
         console.log('world')
       }
       ```
+
 17. 条件语句中的赋值语句使用括号包裹，避免误认为将全等号漏写（eslint：no-cond-assign）
+    
       ```
       if ((val = text.match(expr))) {
 
@@ -125,7 +158,9 @@
 
       }
       ```
+
 18. 多行空行：允许单行空行，但不允许多行空行（eslint：no-multiple-empty-lines）
+    
       ```
       // √
       let value = 'hello world'
@@ -138,7 +173,9 @@
 
       console.log(value)
       ```
+
 19. 三目运算符：简短的一行，长的保持 `?` 和 `:` 与他们所负责的代码同行（eslint：operator-linebreak）
+    
       ```
       let location = env.development ? 'localhost' : 'www.api.com'
 
@@ -146,19 +183,25 @@
         ? 'localhost' 
         : 'www.api.com'
       ```
+
 20. 代码块：单行代码块两边加空格（eslint：block-spacing）
+    
       ```
       function foo () { return true }   √
 
       function foo () {return true}    ×
       ```
+
 21. 命名：变量和函数命名统一使用驼峰命名法（eslint：camelcase）
+    
     ```
     function my_function () {}   √
 
     function myFunction () {}    ×
     ```
+
 22. 取值器：对象中定义了存值器，一定要定义与之对应的取值器（eslint：accessor-pairs）
+    
     ```
     // √
     let person = {
@@ -177,7 +220,9 @@
       }
     }
     ```
+
 23. 子类的构造器中一定要使用 `super`（eslint：constructor-super）
+    
     ```
     class Dog extends Animal {
       constructor () {
@@ -185,13 +230,17 @@
       }
     }
     ```
+
 24. 不对变量使用 `delete` 操作（eslint：no-delete-var）
+    
     ```
     let name
 
     delete name   // ×
     ```
+
 25. 同一模块多个导入时一次性写完（eslint：no-duplicate-imports）
+    
     ```
     import { myFunc1, myFunc2 } from 'module'     // √
 
@@ -199,7 +248,9 @@
 
     import { myFunc2 } from 'module'              // ×
     ```
+
 26. `switch` 使用 `break` 来将条件分支正常中断（eslint：no-fallthrough）
+    
     ```    
     switch (filter) {
       case 1:
@@ -217,25 +268,33 @@
         doSomethingElse()
     }                            // ×
     ```
+
 27. 不省略小数点前面的0（eslint：no-floating-decimal）
+    
     ```
     const discount = 0.5    // √
 
     const discount = .5     // ×
     ```
+
 28. `eval`：避免使用`eval`；注意隐式的`eval`（eslint：no-eval、no-implied-eval）
+    
     ```
     const res = eval('a + b')              // ×
 
     setTimeout("alert('hello world')")     // ×，带有隐式eval
     ```
+
 29. 嵌套的代码块禁止再定义函数（eslint：no-inner-declarations）
+    
     ```
     if (condition) {
       function setAuther () {}   // ×
     }
     ```
+
 30. `return` 语句中的赋值必须有括号包裹（eslint：no-return-assign）
+    
     ```
     function sum (a, b) {
       return (result = a + b)
@@ -245,13 +304,17 @@
       return result = a + b
     }                           // ×
     ```
+
 31. 代码块首尾留空格（eslint：space-before-blocks）
+    
     ```
     if (condition) { ... }      // √
 
     if (condition){ ... }       // ×
     ```
+
 32. 注释首尾留空格（eslint：spaced-comment）
+    
     ```
     // commit     // √
     //commit      // ×
@@ -259,7 +322,9 @@
     /*comment*/         // ×
     /* comment */       // √
     ```
+
 33. 检查 `NaN` 的正确姿势是使用 `isNaN()`（eslint：use-isnan）
+    
     ```
     if (isNaN(price)) { }   // √
 
