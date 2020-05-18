@@ -20,6 +20,10 @@
 
 [Vue](https://github.com/loofk/blog/blob/master/Vue/index.md)
 
+## 阅读
+
+[Vue源码注释](https://github.com/loofk/vue)
+
 ## 练习
 
 [Leetcode题解](https://github.com/loofk/blog/blob/master/Leetcode/index.md)
