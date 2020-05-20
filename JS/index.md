@@ -12,4 +12,4 @@
 
 [JS异步](https://github.com/loofk/blog/blob/master/JS/docs/JS%E5%BC%82%E6%AD%A5.md)
 
-[你见过(0, func)()的用法吗](https://github.com/loofk/blog/blob/master/JS/docs/JS%E5%BC%82%E6%AD%A5.md)
+[你见过(0, func)()的用法吗](https://github.com/loofk/blog/blob/master/JS/docs/%E4%BD%A0%E8%A7%81%E8%BF%87(0%2C%20func)()%E7%9A%84%E7%94%A8%E6%B3%95%E5%90%97.md)
