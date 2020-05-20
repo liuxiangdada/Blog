@@ -11,3 +11,5 @@
 [Promise实现](https://github.com/loofk/blog/blob/master/JS/docs/Promise%E5%AE%9E%E7%8E%B0.md)
 
 [JS异步](https://github.com/loofk/blog/blob/master/JS/docs/JS%E5%BC%82%E6%AD%A5.md)
+
+[你见过(0, func)()的用法吗](https://github.com/loofk/blog/blob/master/JS/docs/JS%E5%BC%82%E6%AD%A5.md)
