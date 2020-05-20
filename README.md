@@ -1,27 +1,23 @@
 ## 关于博客
 
-记录学习
+技术文章、读书笔记、生活随想
 
 
 ## 工程化
 
-[代码规范](https://github.com/loofk/blog/tree/master/%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83/index.md)
+[代码规范](./code-standards/index.md)
 
-[测试](https://github.com/loofk/blog/blob/master/%E6%B5%8B%E8%AF%95/index.md)
+[测试](./test/index.md)
 
 ## 前端
 
-[JS](https://github.com/loofk/blog/blob/master/JS/index.md)
+[JS](./js/index.md)
 
-[Vue](https://github.com/loofk/blog/blob/master/Vue/index.md)
-
-## 阅读
-
-[Vue源码注释](https://github.com/loofk/vue)
+[Vue](./vue/index.md)
 
 ## 练习
 
-[Leetcode题解](https://github.com/loofk/blog/blob/master/Leetcode/index.md)
+[Leetcode题解](./leet-code-solving/index.md)
 
 
 
