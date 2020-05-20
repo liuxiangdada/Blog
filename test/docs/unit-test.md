@@ -69,6 +69,11 @@ vue add @vue/cli-plugin-unit-jest
 npm i -D @vue/cli-plugin-unit-jest
 ```
 
+安装该插件后，需要进行配置
+
+    // jest.config.js
+    preset: '@vue/cli-plugin-unit-jest'
+
 如果不使用该插件，则需要自己安装Jest用到的相关依赖
 
 ```
@@ -77,9 +82,29 @@ npm i -D jest vue-jest babel-jest babel-core jest-serializer-vue @babel/preset-e
 
 其中，jest是测试框架本身；而vue-jest是用来jest如何处理*.vue文件的预处理器；babel-jest、babel-core和@babel/preset-env是用来处理待测试的JS文件的，因为我们希望使用ES Module语法和stage-x的特性；jest-serializer-vue则是一个用来序列化快照的工具
 
-**这里我在配置babel-jest遇到了很多坑，初步看可能是我项目中使用的是老的babel6，但是jest现在支持babel7的语法导致的兼容问题，暂时没有解决，只能使用@vue/cli-plugin-unit-jest，使用这个插件不需要配置babel也不需要安装babel-jest和vue-jest，因为插件内部已经使用了这两个包**
+~~这里我在配置babel-jest遇到了很多坑，初步看可能是我项目中使用的是老的babel6，但是jest现在支持babel7的语法导致的兼容问题，暂时没有解决，只能使用@vue/cli-plugin-unit-jest，使用这个插件不需要配置babel也不需要安装babel-jest和vue-jest，因为插件内部已经使用了这两个包~~
 
-相关包都安装完后，我们需要配置jest，可以在package.json文件里，也可以在根目录下创建一个jest.config.js文件（使用jest --init命令），配置如下
+**配置babel-jest时遇到的坑，主要是由于其安装的依赖是babel-core6.0的版本，babel-jest插件说明的很清楚，由于我当前项目使用的是babel7，所以需要安装7.0以上版本的babel-core**
+
+具体做法是：
+
+    npx babel-upgrade --write
+    npm i
+    
+上面命令的目的是将项目中使用到的babel从6升级为7，之后重新安装一下包就好了
+
+接着需要配置babel：
+
+    // babel.config.js
+    module.exports = {
+      presets: [
+        '@vue/app',
+        '@babel/preset-env',
+      ]
+    }
+
+
+上面弄完之后，还需要配置jest，可以在package.json文件里，也可以在根目录下创建一个jest.config.js文件（使用jest --init命令），配置如下
 
 ```
 module.exports = {
@@ -126,37 +151,6 @@ module.exports = {
   
   // 是否开启测试覆盖率报告
   // collectCoverage: true
-};
-```
-
-默认情况下，babel-jest安装后会自动进行配置，但是如果我们的webpack使用了babel-preset-env，这时默认的babel配置会关闭ES Module的转译，为了测试需要，我们需要显式开启，具体操作是在.babelrc文件中添加一个env.test配置项
-
-```
-{
-  "presets": [["env", { "modules": false }]],
-  "env": {
-    "test": {
-      "presets": [["env", { "targets": { "node": "current" } }]]
-    }
-  }
-}
-```
-
-上面的做法是Vue Test Utils官方文档的做法，与Jest官方文档有些许出入，这里也给出Jest文档的做法
-
-```
-// babel.config.js
-module.exports = {
-  presets: [
-    [
-      '@babel/preset-env',
-      {
-        targets: {
-          node: 'current',
-        },
-      },
-    ],
-  ],
 };
 ```
 
