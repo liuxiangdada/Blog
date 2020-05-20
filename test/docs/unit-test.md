@@ -77,7 +77,7 @@ npm i -D @vue/cli-plugin-unit-jest
 如果不使用该插件，则需要自己安装Jest用到的相关依赖
 
 ```
-npm i -D jest vue-jest babel-jest babel-core jest-serializer-vue @babel/preset-env
+npm i -D jest vue-jest babel-jest babel-core @babel/core jest-serializer-vue @babel/preset-env
 ```
 
 其中，jest是测试框架本身；而vue-jest是用来jest如何处理*.vue文件的预处理器；babel-jest、babel-core和@babel/preset-env是用来处理待测试的JS文件的，因为我们希望使用ES Module语法和stage-x的特性；jest-serializer-vue则是一个用来序列化快照的工具
@@ -99,6 +99,7 @@ npm i -D jest vue-jest babel-jest babel-core jest-serializer-vue @babel/preset-e
     module.exports = {
       presets: [
         '@vue/app',
+        // 新增
         '@babel/preset-env',
       ]
     }
@@ -135,7 +136,7 @@ module.exports = {
   // 快照序列化
   snapshotSerializers: ["jest-serializer-vue"],
 
-  // 测试忽略文件
+  // 测试覆盖率统计忽略文件范围
   coveragePathIgnorePatterns: [
   ],
   
