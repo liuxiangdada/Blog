@@ -55,12 +55,12 @@ sinon， 一个简单的mock库，拥有三个主要函数，分别是spies, stu
 
 ## 如何在Vue项目上进行单元测试
 
-如果你是使用vue-cli构建的项目，可以在可视化界面选择@vue/cli-plugin-unit-jest插件安装即可
+如果你是使用vue-cli3.0以上构建的项目，可以在可视化界面选择@vue/cli-plugin-unit-jest插件安装即可
 
 如果是命令行调用，则执行
 
 ```
-vue add @vue/cli-plugin-unit-jest
+vue add unit-jest
 ```
 
 或者直接使用npm安装
