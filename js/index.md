@@ -1,4 +1,4 @@
-[JS数组方法实现](./docs/(0,%20func)().md)
+[JS数组方法实现](./docs/js-array-methods.md)
 
 [JS常用方法实现](./docs/js-methods.md)
 

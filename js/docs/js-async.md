@@ -18,7 +18,7 @@
 
 ### 异步和 EventLoop 的关系？
 
-查看我其他博文对 EventLoop 的详细分析
+查看我其他博文对 EventLoop 的详细分析 [传送门](./js-eventLoop-browser.md)
 
 #### 浏览器
 
@@ -87,7 +87,7 @@ setTimeout(() => {
 
 #### Node
 
-为什么要区分一下浏览器和 Node 呢？这时因为 Node 因为服务端支撑需要，对任务执行的要求不像浏览器环境，并且在服务端可以调动系统的多线程，完成更强大的功能
+为什么要区分一下浏览器和 Node 呢？这是因为 Node 为服务端支撑需要，对任务执行的要求不像浏览器环境，并且在服务端可以调动系统的多线程，完成更强大的功能
 
 EventLoop 在 Node 中主要有 6 个阶段：timer 阶段、IO 异常 callback 阶段、idel/prepare 阶段、poll 阶段、check 阶段、close callback 阶段
 
@@ -258,7 +258,7 @@ run(gen);
 
 ```
 1.txt的结果
-2.text的结果
+2.txt的结果
 ```
 
 不使用 thunk 函数，也可以使用 Promise：
@@ -423,13 +423,6 @@ function ajaxPromise(url, param) {
   })
 }
 
-function* gen() {
-  let data1 = yield ajaxPromise(url1, param);
-  console.log(data1);
-  let data2 = yield ajaxPromise(url2, data1);
-  console.log(data2);
-}
-
 function run(gen) {
   let g = gen();
 
@@ -440,7 +433,15 @@ function run(gen) {
   })
 }
 
+function* gen() {
+  let data1 = yield ajaxPromise(url1, param);
+  console.log(data1);
+  let data2 = yield ajaxPromise(url2, data1);
+  console.log(data2);
+}
+
 run(gen);
+
 ```
 
 ```
