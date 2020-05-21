@@ -148,6 +148,8 @@ babel本身是只转译语法的，一些新的API，如Iterator、Generator、S
 
 这样做的优点是不会污染原型链，此外，引用的方式能够减少重复定义
 
+配置如下：
+
     plugins: [
       [
         require('@babel/plugin-transform-runtime'),
@@ -162,7 +164,7 @@ babel本身是只转译语法的，一些新的API，如Iterator、Generator、S
     npm i -D babel-plugin-transform-runtime
     npm i -S babel-runtime
 
-babel-runtime这个方法集主要包含core-js和regenerator：
+babel-runtime主要包含core-js和regenerator两个部分：
 
 - core-js包含了一些内置类的转换和静态方法，可以说大部分转化都在这个库中进行
 - regenerator作为core-js的弥补，主要是对generator/yield 和 async/await的支持
@@ -176,20 +178,24 @@ babel-runtime这个方法集主要包含core-js和regenerator：
 babel-loader被用于webpack打包工具，作用在压缩、打包bundle之前，因此需要在webpack中进行配置
 
     rules: [
-      test: /\.js/,
-      exclude: /(node_modules|bower_components)/,
-      loader: 'babel-loader'
+      {
+        test: /\.js/,
+        exclude: /(node_modules|bower_components)/,
+        loader: 'babel-loader'
+      }
     ]
 
 如果还需要对babel进行配置，改为：
 
     rules: [
-      test: /\.js/,
-      exclude: /(node_modules|bower_components)/,
-      use: {
-        loader: 'babel-loader',
-        options: {
-          // 配置项
+      {
+        test: /\.js/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            // 配置项
+          }
         }
       }
     ]
@@ -304,7 +310,7 @@ babel插件要求我们暴露一个函数模块，其返回值为一个visitor�
         }
     }
 
-visitor对象是一种跨语言遍历AST的模式，它定义了在树中获取具体节点的方法，我们假设一个visitor内部有一个a方法，该方法接受被称为path的参数，该参数描述树中某一个节点在整棵树的位置
+visitor对象是一种跨语言遍历AST的模式，它定义了在树中获取具体节点的方法，我们假设一个visitor内部有一个a方法，该方法接受被称为path的参数，描述了树中某一个节点在整棵树的位置
 
     const myVisitor = {
       a(path) {
@@ -313,7 +319,7 @@ visitor对象是一种跨语言遍历AST的模式，它定义了在树中获取�
       }
     }
 
-具体的插件我上传到我的github上，[传送门](https://github.com/loofk/myBabel)
+具体的插件编写不做赘述，贴上我自己实现的简单babel插件 [传送门](https://github.com/loofk/myBabel)
 
 ### 参考文章
 
