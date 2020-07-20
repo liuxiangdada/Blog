@@ -10,7 +10,7 @@
 
 首先我们是知道立即执行函数的用法的
 
-    (function(a) { reuturn a })(1)
+    (function(a) { return a })(1)
    
 这行代码的输出结果为1
 
