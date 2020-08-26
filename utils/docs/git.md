@@ -228,7 +228,7 @@ git rebase --onto <baseBranch> <compareBranch> <topicBranch>
 上面命令的意思是取出topicBranch分支，找出与compareBranch分支分歧之后的提交，将其拼接到baseBranch分支之后，看起来就像是直接基于baseBranch修改的一样
 
 ```diff
-如果提交存在于本地仓库之外，并且有人基于这些提交进行开发，那么不要执行变基
+- 如果提交存在于本地仓库之外，并且有人基于这些提交进行开发，那么不要执行变基
 ```
 
 ### git reset
