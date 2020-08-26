@@ -24,6 +24,21 @@ Git是一款软件配置管理工具，或者说是一个版本控制系统，�
 
 ## 常用命令
 
+### git init
+
+初始化git仓库
+
+### git config
+
+配置git
+
+```
+git config // 查看所有配置命令
+git config -l // 查看所有配置
+git config -e --global // 以vim编辑器编辑用户配置
+git config --global alias.co 'checkout' // 设置别名
+```
+
 ### git clone
 
 将远程仓库克隆到本地，完整的命令如下
@@ -46,6 +61,57 @@ show <主机名> // 查看主机详细信息
 add <主机名> <主机网址> // 添加新的远程主机
 rm <主机名> // 删除现有的某个远程主机
 rename <原主机名> <新主机名> // 改名
+```
+
+### git status
+
+展示工作区和暂存区文件的状态
+
+```
+git status -s // 展示简短信息
+```
+
+### git add
+
+向暂存区添加文件
+
+```
+* // 添加所有文件，忽略.gitignore的限制
+. // 添加删除文件之外的所有修改
+-u // 添加已被git跟踪的文件，因此不包含新建文件
+-A // 添加除.gitignore之外的所有修改
+```
+
+### git commit
+
+提交修改到本地仓库
+
+```
+--amend // 追加修改到上一次提交
+-m <描述> // 编辑提交信息
+-a // 自动add除了新建文件之外的修改并提交
+```
+
+### git checkout
+
+修改HEAD指针的指向，也就是切换分支
+
+```
+-b <新分支名> 创建一个新的分支并切换到该新分支
+git checkout -- <文件名> 撤销工作区对该文件的修改
+```
+
+### git branch
+
+管理分支
+
+```
+git branch // 查看本地分支
+-a // 查看本地远程所有分支
+-d <分支名> // 删除本地指定分支
+-D <分支名> // 强制删除未合并的本地指定分支
+-m <老分支名> <新分支名> // 重命名分支
+-set-upstream <本地分支> <远程分支> // 设置追踪关系
 ```
 
 ### git fetch
@@ -163,6 +229,36 @@ git rebase --onto <baseBranch> <compareBranch> <topicBranch>
 
 注意事项
 
-<font color="red">如果提交存在于本地仓库之外，并且有人基于这些提交进行开发，那么不要执行变基</font>
+<font color='red'>如果提交存在于本地仓库之外，并且有人基于这些提交进行开发，那么不要执行变基</font>
+
+### git reset
+
+版本回退，即可以回退到历史提交
+
+```
+--hard <commitID> // 回退到指定提交，工作区暂存区都没有修改文件
+--soft <commitID> // 回退到指定提交，暂存区有修改文件，工作区没有修改文件
+--mixed <commitID> // 默认参数，回退到指定提交，暂存区没有修改文件，工作区有修改文件
+
+git reset HEAD <文件名> // 将指定文件从暂存区回退到工作区
+```
+
+### git revert
+
+撤销指定的提交
+
+```
+git revert <commitID>..<commitID> // 撤销某次提交或一系列提交的修改并重新提交
+-n // 不自动提交，而是将撤销文件回退到暂存区
+-m <number> <commitID> // 对于合并提交，需要指定撤销哪个分支的提交，一般是1或2
+```
+
+### git cherry-pick
+
+挑拣提交，将其他分支的某个提交引入当前分支，用法和`git revert`类似
+
+```
+git cherry-pick <commitID>..<commitID>
+```
 
 ## 基于gitFlow的工作流
