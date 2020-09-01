@@ -17,6 +17,8 @@
 
 [Vue](./vue/index.md)
 
+[小程序](./mini-program/index.md)
+
 ## 练习
 
 [Leetcode题解](./leetcode-solving/index.md)
