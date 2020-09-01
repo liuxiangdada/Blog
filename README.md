@@ -19,7 +19,7 @@
 
 ## 练习
 
-[Leetcode题解](./leet-code-solving/index.md)
+[Leetcode题解](./leetcode-solving/index.md)
 
 
 
