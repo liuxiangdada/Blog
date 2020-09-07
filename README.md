@@ -2,6 +2,10 @@
 
 技术文章、读书笔记、生活随想
 
+## 软件设计
+
+[软件工程学习笔记](./software/docs/software-engineering.md)
+
 
 ## 工程化
 
