@@ -4,7 +4,7 @@
 
 ## 软件设计
 
-[软件工程学习笔记](./software/docs/software-engineering.md)
+[软件工程学习笔记](./software/index.md)
 
 
 ## 工程化
