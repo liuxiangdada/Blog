@@ -1,4 +1,4 @@
-[阅读源码前你应该准备什么知识](./docs/prepare.md)
+[阅读源码前你应该了解哪些知识](./docs/prepare.md)
 
 [Vue是如何实现数据绑定的](./docs/reactive.md)
 
