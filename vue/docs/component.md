@@ -13,8 +13,9 @@ new Vue 时，对待普通节点（通过传入el、template、render函数生�
 
 new Vue时会根据指定的el，或者调用$mount方法找到真实DOM，并依据该DOM创建一个占位符VNode，然后把该占位符VNode作为$vnode，在组件挂载的时候生成一个渲染VNode作为_vnode，当组件渲染到一个嵌套组件时，会先根据该子组件创建一个占位符VNode，接着在该子组件挂载的时候生成新的渲染VNode，以此渲染出整个组件树
 
-** vm实例的$vnode和_vnode实际上是父子关系 **
-** vnode对象的parent对应其在父组件渲染vnode对象上的占位符vnode **
+**vm实例的$vnode和_vnode实际上是父子关系**
+
+**vnode对象的parent对应其在父组件渲染vnode对象上的占位符vnode**
 
 在递归渲染的过程中，通过闭包保存每次渲染的父实例，以此调用父组件的数据方法，子组件patch完成后，恢复父组件的渲染
 
