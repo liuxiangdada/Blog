@@ -21,7 +21,7 @@ DOM事件通过解析模板上绑定的属性，提取出修饰符，提前插�
 自定义事件在initEvent中进行初始化，但其事件回调是在编译时得到的组件ast节点的on属性，经由createComponent创建组件vnode时把on属性赋值给listeners，然后在组件的init合并组件配置过程传入到_parentListeners属性，最后在initEvent方法中调用updateListeners方法，走和DOM事件绑定相似的逻辑，区别是封装好的invoke回调不是绑定到DOM上，而是作为实例_event对象的key-value存放，等到$emit方法调用时，从_event中取出该回调执行，所以我们知道了其实组件emit某个方法并不是回到父组件去执行该回调，而是访问自身实例的_event属性中有无该方法并执行，其执行环境仍然在子组件中，这样我们就可以通过传值把子组件中的数据传入到回调在父组件中取得子组件数据，这样，我们就可以实现父子通信
 
 **为什么把事件从父组件传递到子组件中保存后，执行时函数中的this仍指向父组件实例**
-前面我们讨论了子组件能够通过emit触发父组件的方法，并能把子组件数据作为参数传递到父组件，这样我们就能在父组件的方法中使用子组件的数据，但我没有说明在该回调中为何能够使用父组件的数据，我们知道emit的实质是在当前实例的_event中寻找对应名称的回调，_event属性又是在父组件渲染时传递而来，按照常理，虽然该方法是父组件定义的方法，但其执行环境已经位于子组件
+前面我们讨论了子组件能够通过emit触发父组件的方法，并能把子组件数据作为参数传递到父组件，这样我们就能在父组件的方法中使用子组件的数据，但我没有说明在该回调中为何能够使用父组件的数据，我们知道emit的实质是在当前实例的_event中寻找对应名称的回调，_event属性又是在父组件渲染时传递而来，按照常理，虽然该方法是父组件定义的方法，但其执行环境已经位于子组件，this应该指向子组件，但我们在初始化的initMethods的方法中，将写在methods属性中的方法修改到实例上并用bind硬绑定this为当前实例，所以即使是在子组件中调用因其原函数已经被绑定为Vue实例，故而可以拿到父组件的数据
 
 ## 双向绑定（v-model）
 
@@ -72,6 +72,22 @@ let Child = {
 ```
 
 ## 插槽
+
+### 老版本
+
+#### 具名插槽
+
+在编译阶段，父组件中将子组件内部的chilren作为插槽vnode，在每个子节点上使用attrs属性记录形如`{ slot: 'header' }`以及使用slot属性记录插槽名称，形如`slot: 'header'`
+
+子组件编译阶段处理`slot`标签时，会记录slotName并在genSlot中将slotName传入`_t`方法中，最后形如`_t('header', children)`
+
+接下来在子组件初始化化initRender方法中，会取得父组件中子组件的占位符vnode中的children，将其以slot名称为键赋值给实例的`$slots`属性，形如`{ header: [VNode] }`，然后在_t方法代表的renderSlot方法中，将$slot属性中对应slotName的子节点返回到子组件的渲染函数中渲染出来
+
+#### 作用域插槽
+
+编译阶段，父组件解析ast节点到template标签时，会取得其slot-scope属性保存在template父ast节点（也就是子组件占位符ast节点）的slotScope属性上，在genData方法中，发现slotScope属性进入genScopedSlots方法，根据slot名称遍历slotScope属性，对每个template节点都拿到其slot-scope属性指定的参数props，然后构造一个返回template节点子节点的函数，最终返回形如`{ key: 'header', fn: function (props) { return _c('p', [_v(_s(props.text))]) } }`的code
+
+子组件在编译时处理`slot`标签时，跟具名插槽不一样的是会从节点的attrs属性中拿到子组件中传递的数据作为props，形如`_t("default",null,{"text":"Hello","msg":msg})`，这样在进入renderSlot渲染时，就能拿到对应的scopedSlotFn，将props作为参数调用scopedSlotFn在子组件渲染时延时得到父组件中设置在template节点中的子节点，这样就能在父组件中访问子组件的数据
 
 
 
