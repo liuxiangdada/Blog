@@ -42,7 +42,7 @@ obj.fn() // 'liu'
 var name = 'liu'
 
 function foo () {
-  setTimeout(() => {
+  setTimeout(function () {
     console.log(this.name)
   }, 100)
 }
@@ -55,7 +55,7 @@ let obj = {
 obj.fn() // 'liu'
 ```
 
-`obj.fn`的执行上下文显然是obj这个对象，我们执行fn时发现其实际上是一个定时器，定时器在JS中会被推入宏任务队列，这意味着执行fn其实只是把匿名函数推入宏任务队列中，等到下次事件循环执行到匿名函数时，obj上下文已经被弹出执行栈，当前上下文只剩全局对象（在浏览器中是windows）
+`obj.fn`的执行上下文显然是obj这个对象，我们执行fn时发现其实际上是一个定时器，定时器在JS中会被推入宏任务队列，这意味着执行fn其实只是把匿名函数推入宏任务队列中，等到下次事件循环执行到匿名函数时，obj上下文已经被弹出栈，当前上下文只剩全局对象（在浏览器中是windows）
 
 ```
 function foo () {
@@ -219,8 +219,24 @@ function foo () {
   console.log(this.name)
 }
 
-function bindFn (fn, context) {
-  return fn.bind(context)
+var name = 'liu'
+
+let a = {
+  name: 'xiang'
+}
+
+let b = foo.bind(a)
+
+b.apply(null) // 'xiang'
+```
+
+### 显式绑定的优先级问题
+
+一般来说显式绑定的优先级是高于隐式绑定的，所以我们可以借助apply、call、bind方法轻易的把this修改成我们期望的对象
+
+```
+function foo () {
+  console.log(this.name)
 }
 
 var name = 'liu'
@@ -229,7 +245,9 @@ let a = {
   name: 'xiang'
 }
 
-let b = bindFn(foo, a)
+let b = foo.bind(a)
 
-b.apply(null) // 'xiang'
+let c = new b() // undefined
 ```
+
+上面这种情况表明，已经被bind硬绑定的函数b在调用`new`操作符时将原绑定对象解绑了，说明new的优先级高于bind
