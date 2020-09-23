@@ -14,4 +14,6 @@
 
 [你见过(0, func)()的用法吗](./docs/(0,%20func)().md)
 
+[this那些事](./docs/js-this.md)
+
 [JS基础知识笔记](./docs/js-basic-grammar.md)

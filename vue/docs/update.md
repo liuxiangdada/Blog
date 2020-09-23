@@ -1,5 +1,9 @@
 # 更新视图
 
+页面渲染更新的大致流程
+
+![渲染流程图](../img/render.PNG)
+
 ## 虚拟DOM
 
 虚拟DOM由真实DOM节点衍生而来，Vue的虚拟dom借鉴了开源库 snabbdom
