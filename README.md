@@ -2,6 +2,10 @@
 
 技术文章、读书笔记、生活随想
 
+## 硬件
+
+[计算机](./computer/index.md)
+
 ## 软件设计
 
 [软件工程](./software/index.md)
