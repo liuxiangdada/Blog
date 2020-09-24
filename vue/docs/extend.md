@@ -73,23 +73,51 @@ let Child = {
 
 ## 插槽
 
-### 老版本
+### 老语法（2.6之前）
 
 #### 具名插槽
 
-在编译阶段，父组件中将子组件内部的chilren作为插槽vnode，在每个子节点上使用attrs属性记录形如`{ slot: 'header' }`以及使用slot属性记录插槽名称，形如`slot: 'header'`
+在编译阶段，父组件中将子组件内部的chilren作为插槽vnode，在每个子节点上添加attrs属性记录形如`attrs: { slot: 'header' }`以及使用slot属性记录插槽名称，形如`slot: 'header'`
 
-子组件编译阶段处理`slot`标签时，会记录slotName并在genSlot中将slotName传入`_t`方法中，最后形如`_t('header', children)`
+子组件编译阶段处理`slot`标签时，会记录slotName并在genSlot中将slotName传入`_t()`方法中，最后得到形如`_t('header', children)`的code，children指代递归生成的子vnode节点
 
-接下来在子组件初始化化initRender方法中，会取得父组件中子组件的占位符vnode中的children，将其以slot名称为键赋值给实例的`$slots`属性，形如`{ header: [VNode] }`，然后在_t方法代表的renderSlot方法中，将$slot属性中对应slotName的子节点返回到子组件的渲染函数中渲染出来
+接下来在子组件初始化化initRender方法中，会取得父组件中子组件的占位符vnode中的children，将其以slot名称为键赋值给实例的`$slots`属性，形如`vm.$slots = { header: [VNode] }`，然后在renderSlot方法中，将$slot属性中对应slotName的子节点返回到子组件的渲染函数中渲染出来
 
 #### 作用域插槽
 
-编译阶段，父组件解析ast节点到template标签时，会取得其slot-scope属性保存在template父ast节点（也就是子组件占位符ast节点）的slotScope属性上，在genData方法中，发现slotScope属性进入genScopedSlots方法，根据slot名称遍历slotScope属性，对每个template节点都拿到其slot-scope属性指定的参数props，然后构造一个返回template节点子节点的函数，最终返回形如`{ key: 'header', fn: function (props) { return _c('p', [_v(_s(props.text))]) } }`的code
+编译parse阶段，父组件解析ast节点到template标签时，会取得其slot-scope属性保存在子组件占位符ast节点的`slotScope`属性上，并将自身赋值给子组件占位符节点的scopedSlots属性，在generate阶段的genData方法中，发现scopedSlots属性进入genScopedSlots方法，根据slot名称遍历slotScope属性，对每个template节点都拿到其slot-scope属性指定的参数props，然后构造一个返回template节点子节点的函数，最终返回形如`scopedSlots: _u([{ key: 'header', fn: function (props) { return _c('p', [_v(_s(props.text))]) } }])`的code
 
-子组件在编译时处理`slot`标签时，跟具名插槽不一样的是会从节点的attrs属性中拿到子组件中传递的数据作为props，形如`_t("default",null,{"text":"Hello","msg":msg})`，这样在进入renderSlot渲染时，就能拿到对应的scopedSlotFn，将props作为参数调用scopedSlotFn在子组件渲染时延时得到父组件中设置在template节点中的子节点，这样就能在父组件中访问子组件的数据
+子组件在编译时处理`slot`标签时，跟具名插槽不一样的是会从节点的attrs属性中拿到子组件中传递的数据作为props，形如`_t("default",null,{"text":"Hello","msg":msg})`
 
+和具名插槽有点不一样，这时父组件中的子组件占位符vnode没有children，所以`$slot`属性为空，但是后面在_render时，通过normalizeScopedSlots方法可以取得上面生成的子组件data中的scopedSlots属性，将插槽名对应的函数赋值给实例的`$scopedSlots`属性
 
+这样在进入renderSlot渲染时，就能根据`$scopedSlots`对象和插槽名拿到对应的scopedSlotFn，将props作为参数调用scopedSlotFn，在子组件渲染时延时得到父组件中设置在template节点中的子节点，这样就能在父组件中访问子组件的数据
+
+### 新语法
+
+自2.6版本起，使用`v-slot`代替了混乱的`slot`和`slot-scope`，新语法如下：
+```
+// 具名插槽
+<template v-slot></template>
+<template v-slot:header></template>
+<template #header></template>
+
+// 作用域插槽
+<template v-slot:header="props"></template>
+<template v-slot:header="{ user }">
+  <p>{{ user.firstName }}</p>
+</template>
+<child v-slot:default="props"></child>
+<child #default="props"></child>
+```
+
+#### 具名插槽
+
+新版本父组件在编译阶段大致和原来相同，不同在于parse阶段会把template子节点赋值给父ast节点的scopedSlots属性上，而不是作为子组件占位符节点的children；碰到直接写在子组件节点上的`v-slot`，会判断是否是在组件上使用；是否使用了老语法；是否是默认插槽；不满足报错处理，如果符合要求，那么会创建一个template节点把该子组件下的children移到template节点下，清空children，最后赋值给scopedSlots属性，使得好像是用户手写了一个`<template v-slot:default></template>`一样，而子组件中没有被template包裹的节点统统作为子组件的children在创建子组件vnode时作为componentOptions传入最终作为`$slot`属性，进而通过normalizeScopedSlots方法被规范到`$scopedSlots`属性中，被子组件渲染时拿到
+
+#### 作用域插槽
+
+新语法里，作用域插槽和具名插槽的区别是在编译阶段，作用域插槽就被封装成一个函数，等到子组件渲染时才被转化成vnode，而具名插槽在父组件阶段就已经被转成vnode，不过后来将`$slot`属性规范为`$scopedSlots`属性的函数引用而已，所以新语法总的来说两种插槽的写法处理趋于一致，沿袭了原来的需求，即作用域插槽延时渲染
 
 ## keep-alive
 
