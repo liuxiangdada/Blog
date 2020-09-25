@@ -149,3 +149,42 @@ keep-alive组件还定义三个props：`include/exclude/max`用于配置哪些�
 切换keep-alive组件内的动态组件时，会进入页面的patch流程，在patchVnode触发prepatch钩子时，就会执行updateChildComponent方法，由于这时新旧vnode为不同组件的vnode，所以会触发resolveSlots方法修改keep-alive组件的`$slots`属性并重新渲染，这样进入keep-alive组件的重新渲染，如果命中缓存就会在缓存中拿到该组件的vnode，然后进入新组件的渲染流程，这时由于前面已经标记了keepAlive属性，在进入组件的init钩子时就不会再去创建组件实例并mount而是直接执行prepatch钩子，重点是这时`isReactivated`为true，会命中reactivateComponent方法将新组件插入到DOM中，然后删除旧组件时又触发旧组件的deactivated钩子，最后invokeInsertHook时触发新组件的activated钩子，而不触发新组件的created、mounted等钩子
 
 ## transition
+
+transition组件在数据变更引发内部节点消失时，会先执行父组件的渲染把该移除的vnode移除掉（生成render函数时针对v-if指令采取三元运算符），接着进入updateChildComponent方法更新`$slots`，因为移除后会填补一个空白的文本节点，所以在`resolveSlots`被过滤掉，所以下次进入transition的render函数时，已经拿不到子节点了
+
+当渲染到transition组件节点时，由于其render函数是自定义的，所以走自定义render函数，根据`this.$slots.default`拿到子节点，接着校验诸如不能多个节点、模式只能是in-out或者out-in，然后拿到第一个子节点，给子节点设置以`__transition-`为前缀的key，接着赋值子节点`data.transition`属性，值是设置在transition上的props，最后把该子节点返回作为vnode渲染
+
+在创建patch函数时，我们提到会把不同平台的钩子注入进来，所以已经把transition的_enter函数注入到节点patch的create钩子，把remove注入到节点patch的destory钩子中
+
+等到子节点渲染时，在创建后就会触发created钩子，执行_enter方法，该方法首先会检查是否有`data.transition`属性，这样就能在其他节点触发钩子的时候过滤掉，校验通过后提取transition设置的一系列props，接着我们判断`isAppear`是否为真，并且针对是否设置`appear`prop决定要不要首次就进行过渡，然后我们根据props得到enter过渡的一系列类名、钩子函数
+
+这个时候我们添加`enter`和`enter-active`类名，等到nextFrame（浏览器的逐帧刷新机制）回调触发时，首先删除`enter`类名，然后添加`enter-to`类名，接着执行whenTransitionEnds方法，该方法会绑定一个监听函数监听`transitionend`事件并在duration到期后执行定时器回调`end`，内部首先移除监听，然后调用回调cb，cb是我们在前面定义的`_enterCb`方法，该方法，会移除`enter-to`和`enter-active`类
+
+节点在移除时会执行leave钩子，流程和_enter钩子是类似的，只不过类名不一样
+
+至此，我们完成了css节点在各个时间节点的插入移除过程，保证了过渡的实现，同时在过渡的各个节点执行我们定义的JS钩子函数（如果有的话）
+
+## transition-group
+
+transition-group在自定义render中首先拿到props中的tag，如果没有设为span，然后创建一个map保存子节点的key和vnode（所以子节点必须指定key），接着取出子节点，遍历把设置在transition-group上的props作为子节点的`data.transtition`属性，和上面一样，最后根据tag和children创建出一个vnode返回进行渲染
+
+继续渲染，走到vm._update方法时，由于在transition-group组件的beforeMounted钩子中重写了该方法，所以会执行该重写方法，此时当成正常的_update方法即可，这样就渲染出了transition-group中的节点
+
+在重写的_update方法中执行了两次patch，官方的说法是因为updateChild的算法不稳定，于是在第一次时删除多余的节点，并触发leave钩子，在第二次时，保证留下的节点在它正确的位置
+
+### 增加节点
+
+接着我们添加一个元素触发enter逻辑，就会再次进入render函数，这时我们首先保存上次的子节点作为`prevChildren`，注意这时的子节点是比prevChildren多一个的，我们首先对prevChildren进行处理，保存每个节点当前的位置信息到`data.pos`，然后根据tag和children创建出一个vnode返回进行渲染
+
+继续渲染触发_update，增加节点时也走正常update逻辑，由于是新增节点，所以在第一次update时因为比较_vnode和kept（kept下面提）没有什么变化，等到第二次update时，vnode是比_vnode多一个节点的，所以在patchVnode时会在对应位置插入节点，我们在上面transition时提到有_enter钩子方法和remove钩子方法，因为我们前面为每个子节点都添加了`data.transition`属性，所以在插入时就会自动添加`enter`和`enter-active`类
+
+这时我们来到transition-group组件的updated生命周期，一开始会检测节点是否定义了moveclass并且class实现和过渡动画相关，如果不满足啥也不干，否则会对子节点执行以下三步
+- 如果我们快速添加节点，则会执行callPendingCbs方法，立即执行moveCb回调和enerCb回调
+- 记录添加后子节点的位置记为`data.newPos`
+- 比较前后两次位置，如果有差异，则把子节点恢复到原来的位置
+
+接着我们调用`document.body.offsetHeight`执行一次浏览器重绘，这时我们看到DOM上所有节点因为被新节点撑开的空间又消失了，接着我们遍历每个子节点，添加`move-class`，并把移动的位置复原，这样原来的节点就会有被撑开的过渡，使得看起来不那么生硬，最后和上面transition一样，完成进入后的过渡
+
+### 删除节点
+
+删除节点重新进入render函数，有一点不同，就是我们在比较map时，会把仍然在的接待保存到`this.kept`，把删除的节点保存到`this.removed`，这样在执行重写的_update方法时，就会在第一次patch在updateChildren时最后删除多余的节点，就会触发leave钩子，在里面添加`leave`和`leave-active`类，第二次update时就已经一样了，接着又走到updated周期钩子，这时和增加节点一样，会先回复原位，然后在回调中复原，最后完成离开的过渡并在_leaveCb方法中移除那个节点
