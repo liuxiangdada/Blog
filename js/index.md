@@ -16,4 +16,6 @@
 
 [this那些事](./docs/js-this.md)
 
+[原型链与继承](./docs/js-prototype.md)
+
 [JS基础知识笔记](./docs/js-basic-grammar.md)

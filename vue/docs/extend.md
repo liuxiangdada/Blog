@@ -79,19 +79,19 @@ let Child = {
 
 在编译阶段，父组件中将子组件内部的chilren作为插槽vnode，在每个子节点上添加attrs属性记录形如`attrs: { slot: 'header' }`以及使用slot属性记录插槽名称，形如`slot: 'header'`
 
-子组件编译阶段处理`slot`标签时，会记录slotName并在genSlot中将slotName传入`_t()`方法中，最后得到形如`_t('header', children)`的code，children指代递归生成的子vnode节点
+子组件编译阶段处理`slot`标签时，会记录`slotName`并在genSlot中将slotName传入`_t -> renderSlots`方法中，最后得到形如`_t('header', children)`的code，children指代递归生成的插槽默认的子vnode节点
 
-接下来在子组件初始化化initRender方法中，会取得父组件中子组件的占位符vnode中的children，将其以slot名称为键赋值给实例的`$slots`属性，形如`vm.$slots = { header: [VNode] }`，然后在renderSlot方法中，将$slot属性中对应slotName的子节点返回到子组件的渲染函数中渲染出来
+接下来在子组件初始化化initRender方法中，会取得子组件的占位符vnode中的children，以slot名称为键赋值给实例的`$slots`属性，形如`vm.$slots = { header: [VNode] }`，然后在renderSlot方法中，将$slot属性中对应slotName的子节点返回到子组件的渲染函数中渲染出来
 
 #### 作用域插槽
 
-编译parse阶段，父组件解析ast节点到template标签时，会取得其slot-scope属性保存在子组件占位符ast节点的`slotScope`属性上，并将自身赋值给子组件占位符节点的scopedSlots属性，在generate阶段的genData方法中，发现scopedSlots属性进入genScopedSlots方法，根据slot名称遍历slotScope属性，对每个template节点都拿到其slot-scope属性指定的参数props，然后构造一个返回template节点子节点的函数，最终返回形如`scopedSlots: _u([{ key: 'header', fn: function (props) { return _c('p', [_v(_s(props.text))]) } }])`的code
+编译parse阶段，父组件解析ast节点到template标签时，会取得其slot-scope属性保存在子组件占位符ast节点的`slotScope`属性上，并将自身赋值给子组件占位符节点的`scopedSlots`属性，在generate阶段的genData方法中，发现存在scopedSlots属性进入genScopedSlots方法，根据slot名称遍历slotScope属性，对每个template节点都拿到其slot-scope属性指定的参数props，然后构造一个返回template节点子节点的函数，然后把函数和key以对象数组的形式传入resolveScopedSlots方法中处理，并作为子组件的data属性返回，generate后生成`scopedSlots: _u([{ key: 'header', fn: function (props) { return _c('p', [_v(_s(props.text))]) } }])`的code
 
-子组件在编译时处理`slot`标签时，跟具名插槽不一样的是会从节点的attrs属性中拿到子组件中传递的数据作为props，形如`_t("default",null,{"text":"Hello","msg":msg})`
+子组件在编译时处理`slot`标签时，跟具名插槽不一样的是会从节点的attrs属性中拿到子组件中传递的数据作为props，`_t("default",null,{"text":"Hello","msg":msg})`代码中第三个参数即为props
 
-和具名插槽有点不一样，这时父组件中的子组件占位符vnode没有children，所以`$slot`属性为空，但是后面在_render时，通过normalizeScopedSlots方法可以取得上面生成的子组件data中的scopedSlots属性，将插槽名对应的函数赋值给实例的`$scopedSlots`属性
+和具名插槽有点不一样，这时子组件占位符vnode没有children，所以`$slot`属性为空，但是后面在_render时，通过normalizeScopedSlots方法可以取得上面生成的子组件data中的scopedSlots属性，将插槽名对应的函数赋值到实例的`$scopedSlots`属性中
 
-这样在进入renderSlot渲染时，就能根据`$scopedSlots`对象和插槽名拿到对应的scopedSlotFn，将props作为参数调用scopedSlotFn，在子组件渲染时延时得到父组件中设置在template节点中的子节点，这样就能在父组件中访问子组件的数据
+这样在进入renderSlot渲染时，就能根据`$scopedSlots`对象和插槽名拿到对应的scopedSlotFn，将props作为参数调用scopedSlotFn，在子组件渲染时延时得到父组件中设置在template节点中的vnode子节点，这样就能在父组件中访问子组件的数据
 
 ### 新语法
 
@@ -113,12 +113,39 @@ let Child = {
 
 #### 具名插槽
 
-新版本父组件在编译阶段大致和原来相同，不同在于parse阶段会把template子节点赋值给父ast节点的scopedSlots属性上，而不是作为子组件占位符节点的children；碰到直接写在子组件节点上的`v-slot`，会判断是否是在组件上使用；是否使用了老语法；是否是默认插槽；不满足报错处理，如果符合要求，那么会创建一个template节点把该子组件下的children移到template节点下，清空children，最后赋值给scopedSlots属性，使得好像是用户手写了一个`<template v-slot:default></template>`一样，而子组件中没有被template包裹的节点统统作为子组件的children在创建子组件vnode时作为componentOptions传入最终作为`$slot`属性，进而通过normalizeScopedSlots方法被规范到`$scopedSlots`属性中，被子组件渲染时拿到
+新版本父组件在编译阶段大致和原来相同，不同在于parse阶段会把template标签的子节点赋值到父ast节点的scopedSlots属性上，不包裹在template中的节点才作为子组件占位符节点的children；碰到直接写在子组件节点上的`v-slot`，会判断是否是在组件上使用；是否使用了老语法；是否是默认插槽；不满足报错处理，如果符合要求，那么会创建一个template节点把该子组件下的children移到template节点下，清空children，最后赋值给scopedSlots属性，使得好像是用户手写了一个`<template v-slot:default></template>`一样，而子组件中没有被template包裹的节点统统作为子组件的children在创建子组件vnode时作为componentOptions传入最终作为`$slot`属性，进而通过normalizeScopedSlots方法被规范到`$scopedSlots`属性中，被子组件渲染时拿到
 
 #### 作用域插槽
 
 新语法里，作用域插槽和具名插槽的区别是在编译阶段，作用域插槽就被封装成一个函数，等到子组件渲染时才被转化成vnode，而具名插槽在父组件阶段就已经被转成vnode，不过后来将`$slot`属性规范为`$scopedSlots`属性的函数引用而已，所以新语法总的来说两种插槽的写法处理趋于一致，沿袭了原来的需求，即作用域插槽延时渲染
 
 ## keep-alive
+
+keep-alive组件的本质是缓存实例化的组件vnode，下次触发渲染时命中缓存就直接从cache中取得vnode，而切换后的组件不再需要经历render、mounted的过程
+
+keep-alive组件使用时要注意
+- 只能作用于组件，其内部每次只能渲染一个组件，并且内部不能包含除组件外的其他节点
+- 内部的组件必须设置name属性，不然无法成功取得对应组件（其实这时会取组件的tag）
+- keep-alive的本质是拿空间换时间的一种实现，如果缓存组件过多，性能会下降，最好设置max作为限制，这样在超出max范围后就会删除最久没被使用的组件vnode
+
+### keep-alive的实现
+
+keep-alive组件是内置组件，在initGlobalAPI方法中作为全局组件被注册，所以在任何地方都能使用
+
+其实现在`core/components/keep-alive`文件中，内部主要是手动定义了keep-alive组件的配置对象，重点是手写了render函数，该函数返回内部第一个组件的vnode并将其缓存到cache中
+
+值得一提的是render函数中取内部组件的方式和`slot`是类似的，所以可理解为keep-alive是另类的slot使用
+
+keep-alive组件还定义三个props：`include/exclude/max`用于配置哪些组件是否需要被缓存以及最大缓存组件数，在mounted钩子中对`include/exclude`进行监听，把不需要缓存的vnode销毁并从cache中移除，在移除时利用LRU思想做了优化，每次命中缓存就会把命中的vnode的key放到keys数组的末尾，这样在移除时只需要移除栈底的元素就是最久没被使用的vnode
+
+### keep-alive组件的初次渲染
+
+初次渲染走到patch，然后渲染到keep-alive组件时触发keep-alive组件的实例化并进入keep-alive组件的渲染逻辑，这时就进入keep-alive组件的render函数，我们取到keep-alive组件实例`$slots`属性的default即代表拿到其内部的子节点，这时再取出第一个组件节点，加入缓存并返回该组件vnode
+
+渲染keep-alive组件最终得到的是其第一个组件的vnode，所以又会进入组件vnode的渲染，组件渲染完成后接着渲染keep-keep-alive组件，执行其mounted钩子，至此，keep-alive组件初次渲染完毕
+
+### keep-alive组件的再次渲染
+
+切换keep-alive组件内的动态组件时，会进入页面的patch流程，在patchVnode触发prepatch钩子时，就会执行updateChildComponent方法，由于这时新旧vnode为不同组件的vnode，所以会触发resolveSlots方法修改keep-alive组件的`$slots`属性并重新渲染，这样进入keep-alive组件的重新渲染，如果命中缓存就会在缓存中拿到该组件的vnode，然后进入新组件的渲染流程，这时由于前面已经标记了keepAlive属性，在进入组件的init钩子时就不会再去创建组件实例并mount而是直接执行prepatch钩子，重点是这时`isReactivated`为true，会命中reactivateComponent方法将新组件插入到DOM中，然后删除旧组件时又触发旧组件的deactivated钩子，最后invokeInsertHook时触发新组件的activated钩子，而不触发新组件的created、mounted等钩子
 
 ## transition
