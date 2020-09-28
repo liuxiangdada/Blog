@@ -16,3 +16,5 @@
 
 [Vuex数据仓库是如何构建的](./docs/vuex/store.md)
 
+[Vuex常用API](./docs/vuex/api.md)
+
