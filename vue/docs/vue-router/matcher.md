@@ -122,3 +122,10 @@ return _createRoute(null, location)
 ```
 
 ## addRoutes
+
+这个方法很简单，因为我们前面在闭包中已经保存了`pathList`、`pathMap`和`nameMap`三个表，所以我们要增加路由只需要再次调用`createRouteMap`方法，重复`RouteRecord`树的构建过程，刷新这三张表就好
+```
+function addRoutes (routes) {
+  createRouteMap(routes, pathList, pathMap, nameMap)
+}
+```
