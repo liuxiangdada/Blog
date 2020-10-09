@@ -67,4 +67,58 @@ declare type Route = {
 
 ## match
 
+match方法的功能就是匹配出新路径，我们依据输入的`rawLocation`，规范化出其中的`name`、`path`、`query`、`params`等关键信息
+```
+const location = normalizeLocation(raw, currentRoute, false, router)
+```
+
+然后我们检查有无`name`，如果是命名路由，则在`nameMap`中查找出对应的`RouteRecord`，调用`_createRoute`生成新路径
+```
+if (name) {
+  const record = nameMap[name]
+  if (process.env.NODE_ENV !== 'production') {
+    warn(record, `Route with name '${name}' does not exist`)
+  }
+  if (!record) return _createRoute(null, location)
+  const paramNames = record.regex.keys
+    .filter(key => !key.optional)
+    .map(key => key.name)
+
+  if (typeof location.params !== 'object') {
+    location.params = {}
+  }
+
+  if (currentRoute && typeof currentRoute.params === 'object') {
+    for (const key in currentRoute.params) {
+      if (!(key in location.params) && paramNames.indexOf(key) > -1) {
+        location.params[key] = currentRoute.params[key]
+      }
+    }
+  }
+
+  location.path = fillParams(record.path, location.params, `named route "${name}"`)
+  return _createRoute(record, location, redirectedFrom)
+}
+```
+
+否则就根据path去`pathMap`中查找，找到也调用`_createRoute`生成新路径
+```
+else if (location.path) {
+  location.params = {}
+  for (let i = 0; i < pathList.length; i++) {
+    const path = pathList[i]
+    const record = pathMap[path]
+    if (matchRoute(record.regex, location.path, location.params)) {
+      return _createRoute(record, location, redirectedFrom)
+    }
+  }
+}
+```
+
+如果都匹配不到，则创建一个空路径
+```
+// no match
+return _createRoute(null, location)
+```
+
 ## addRoutes
