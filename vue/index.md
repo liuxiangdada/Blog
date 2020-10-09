@@ -26,7 +26,7 @@
 
 [vue-router的导航守卫](./docs/vue-router/guard.md)
 
-[vue-router提供的全局组件](./docs/vue-router/global-components.md)
+[vue-router提供的全局组件](./docs/vue-router/global-component.md)
 
 [vue-router的路由模式](./docs/vue-router/history.md)
 
