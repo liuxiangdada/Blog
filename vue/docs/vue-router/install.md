@@ -2,7 +2,7 @@
 
 ## 注入
 
-安装的方法由`install`实现，该方法实现在vuex源码的`src/install.js`路径下，安装过程主要干了以下几件事
+安装的方法由`install`实现，该方法实现在vue-router源码的`src/install.js`路径下，安装过程主要干了以下几件事
 
 1.防止重复安装
 ```
@@ -14,7 +14,7 @@ _Vue = Vue
 
 2.使用`Vue.mixin`方法全局注入`beforeCreated`和`destroyed`钩子
 
-a.在`beforeCreated`钩子中，首先判断有没有在`new Vue`时传入router对象，有的话我们使用`this._routerRoot`保存当前实例，这么做的好处是我们在`Vue-Router`源码中就能用这个属性代指vm实例，语义化更强
+a.在`beforeCreated`钩子中，首先判断有没有在`new Vue`时传入router对象，有的话我们使用`this._routerRoot`保存当前实例，这么做的好处是我们在vue-router源码中就只需要用这个属性代指vm实例，语义化更强
 ```
 this._routerRoot = this
 ```
@@ -57,7 +57,7 @@ this.afterHooks = []
 this.matcher = createMatcher(options.routes || [], this)
 ```
 
-这里最重要的就是根据用户传入的`routes`路由配置生成了路由匹配器`matcher`，它的创建过程和作用我会单独解释
+这里最重要的就是根据用户传入的路由配置生成的路由匹配器`matcher`，它的创建过程和作用我会在后面单独分析
 
 接着我们根据`options.mode`参数决定使用哪种路由模式，这里做了一个降级优化，如果浏览器不支持`PushState`，则会退化到使用`hash`模式，如果不在浏览器中则使用`abstract`模式
 ```
@@ -73,18 +73,18 @@ if (!inBrowser) {
 this.mode = mode
 ```
 
-接着我们定义了一堆方法，我们分为内置方法和API来一一解释
+接着我们定义了一堆方法，分为内置方法和公共API一一说明
 
 内置方法
 - init，初始化router，做一些前置工作，后面单独讲
-- match，匹配路由，主要是根据当前路径和传入的location匹配出要跳转到的路由
+- match，匹配路由，主要是根据当前路由和传入的location匹配出要跳转到的路由
 
 暴露方法
 - beforeEach、beforeResolve、afterEach，三个全局钩子，在路由跳转的不同时机触发
 - push、replace、go、back、forward，导航方法，控制路由前进后退
-- getMatchedComponents，根据传入位置找出匹配路由中设置的组件数组
+- getMatchedComponents，根据传入location找出匹配路由中设置的组件数组
 - resolve，解析目标location的位置，返回具体的路由信息
-- addRoutes，给用户提供动态添加路由的一种方法
+- addRoutes，给用户提供动态添加路由的方法
 - onReady，注册一个回调，在完成初始导航时调用，这意味着它能处理异步钩子和异步组件
 - onError，注册一个回调，在导航发生错误时调用
 
