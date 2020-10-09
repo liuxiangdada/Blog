@@ -22,3 +22,11 @@
 
 [vue-router插件的安装过程](./docs/vue-router/install.md)
 
+[vue-router核心-路由匹配器](./docs/vue-router/matcher.md)
+
+[vue-router的导航守卫](./docs/vue-router/guard.md)
+
+[vue-router提供的全局组件](./docs/vue-router/global-components.md)
+
+[vue-router的路由模式](./docs/vue-router/history.md)
+
