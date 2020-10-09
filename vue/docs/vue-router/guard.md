@@ -4,7 +4,7 @@
 
 当我们使用`router-link`或者`this.$router.push`来切换路径时，最终调用的都是`router.history.transitionTo`来切换的，我们首先拿到待切换的路径，然后执行`confirmTransition`方法，该方法内部定义了`runQueue`和`iterator`方法来实现一个队列执行流程
 
-然后我们首先执行组件定义的`beforeRouteLeave`钩子，接着执行`this.router.beforeHooks`，然后执行组件的`beforeRouteUpdate`钩子，接着执行路由中定义的`beforeEnter`钩子，最后解析异步组件
+队列中我们首先执行组件定义的`beforeRouteLeave`钩子，接着执行`this.router.beforeHooks`，然后执行组件的`beforeRouteUpdate`钩子，接着执行路由中定义的`beforeEnter`钩子，最后解析异步组件
 ```
 const queue: Array<?NavigationGuard> = [].concat(
   // in-component leave guards
@@ -20,7 +20,7 @@ const queue: Array<?NavigationGuard> = [].concat(
 )
 ```
 
-在`runQueue`执行完所有钩子后，就触发回调，回调中又建立了一个队列，包含了组件的`beforeRouteEnter`钩子和全局的`beforeResolve`钩子
+在`runQueue`执行完所有钩子后，就触发回调，回调中又新建了一个队列，包含了组件的`beforeRouteEnter`钩子和全局的`beforeResolve`钩子
 ```
 runQueue(queue, iterator, () => {
   const postEnterCbs = []
@@ -105,9 +105,3 @@ this.router.afterHooks.forEach(hook => {
   hook && hook(route, prev)
 })
 ```
-
-## 初次进入路由的流程
-
-
-
-## 再次触发路由的流程
