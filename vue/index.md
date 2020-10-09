@@ -18,3 +18,7 @@
 
 [Vuex常用API](./docs/vuex/api.md)
 
+## VueRouter源码分析
+
+[vue-router插件的安装过程](./docs/vue-router/install.md)
+
