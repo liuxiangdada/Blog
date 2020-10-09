@@ -47,3 +47,38 @@ function findAnchor (children) {
 ```
 
 ## router-view
+
+路由的跳转最终展现在页面上就是组件的变化，所以切换路由实质上是根据路径找到路由配置中的组件，然后渲染到`router-view`中，我们有两个问题需要解决
+
+1.路径切换后，为什么能触发页面重新渲染呢？
+
+在前面我们提到，VueRouter会注入一个beforeCreate钩子，其中有这么一段代码：
+```
+Vue.util.defineReactive(this, '_route', this._router.history.current)
+```
+
+它把`this._route`设置为响应式对象，当然一般我们不会直接引用这个属性因为它是内置属性，通常引用`this.$route`，因为：
+```
+Object.defineProperty(Vue.prototype, '$route', {
+  get () { return this._routerRoot._route }
+})
+```
+这样当我们访问`this.$route`时就会收集依赖，依赖的收集在`router-view`组件的render函数中
+```
+const route = parent.$route
+```
+
+完成路径切换后，我们会执行回调
+```
+  history.listen(route => {
+    this.apps.forEach(app => {
+      app._route = route
+    })
+  })
+```
+
+这里会对`this._route`重新赋值，这样就能触发重新渲染了
+
+2.路由切换后是如何找到对应的组件的，嵌套路由又是如何处理的？
+
+在`router-view`组件的渲染函数中，我们定义了data的`routerView`属性代表这个是一个RouterView组件，
