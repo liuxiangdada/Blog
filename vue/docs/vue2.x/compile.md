@@ -132,7 +132,7 @@ parseHTML方法通过逐个解析，最终生成了完整的ast树
 
 ## AST转可执行代码
 
-AST转成可执行代码其实分成了两步，第一个转成代码字符串，第二部调用new Function将其转化成render函数
+AST转成可执行代码其实分成了两步，第一步转成代码字符串，第二步调用new Function将其转化成render函数
 
 为了减小代码体积，在转化过程中使用的一些渲染方法都使用简写，定义在源码的`src\core\instance\render-helpers\index.js`路径中
 
