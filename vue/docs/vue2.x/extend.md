@@ -41,14 +41,61 @@ Vue的响应式对象其实并没有实现双向绑定，只完成了从数据�
 v-model作用于表单元素实质是语法糖，ast节点在generate时，会new CodegenState，这个类干了一件事就是把baseOptions中定义的全局directives（html、text、model）合并到自定义配置中作为编译参数，接下来在genData时发现是指令则会调用genDirectives方法解析，接着去找options中的model指令，执行定义的model函数，因为是普通文本input，命中genDefaultModel方法，该方法主要处理了下面几件事：
 - 针对绑定了v-bind的属性，不能再绑定v-model
 - 获取v-model上的修饰符，注意lazy修饰符，其本质是改为监听change事件而不是input事件
-- 生成赋值语句，把input事件的value赋值给绑定prop并提供composing判定（后面讲作用）
+- 生成赋值语句，把input事件的value赋值给绑定prop并提供composing判定，当composing为true时，直接返回（后面讲作用）
 - 最后给该ast节点增加名为value的prop和input事件
 
 上面针对v-model指令的编译阶段的行为作出了分析，在运行时又是如何触发的呢？
 
 会在节点创建时触发vnode的create钩子，调用updateDirectives方法，该方法调用_update，由于创建时没有oldVnode，所以我们把注入到Vue.options中的指令（show、model）的inserted钩子和componentUpdated钩子合并到vnode的insert钩子中，这样在patch最后执行invokeInsertHook方法时就会执行inserted钩子，该钩子就绑定了`compositionstart`事件和`compositionend`事件
 
-我们在input上输入中文时就会触发compositionend事件进而内部trigger触发input事件执行回调进行赋值，虽然这时更新页面同时也触发了update钩子，会再次进入updateDirectives方法，这时只会触发model的componentUpdated钩子，而componentUpdated钩子是针对select的，所以不会有其他变化
+我们在input上输入中文结束后就会触发compositionend事件进而内部trigger触发input事件执行回调进行赋值，虽然这时更新页面同时也触发了update钩子，会再次进入updateDirectives方法，但这时由于`dirsWithInsert`数组为空，只会触发model的componentUpdated钩子，而componentUpdated钩子是针对select的，所以不会有其他变化
+ ```
+const dirsWithInsert = []
+const dirsWithPostpatch = []
+
+let key, oldDir, dir
+for (key in newDirs) {
+  oldDir = oldDirs[key]
+  dir = newDirs[key]
+  // 触发update钩子时，新旧指令都存在，只往dirsWithPostpatch中添加dir
+  if (!oldDir) {
+    // new directive, bind
+    callHook(dir, 'bind', vnode, oldVnode)
+    if (dir.def && dir.def.inserted) {
+      dirsWithInsert.push(dir)
+    }
+  } else {
+    // existing directive, update
+    dir.oldValue = oldDir.value
+    dir.oldArg = oldDir.arg
+    callHook(dir, 'update', vnode, oldVnode)
+    if (dir.def && dir.def.componentUpdated) {
+      dirsWithPostpatch.push(dir)
+    }
+  }
+}
+
+if (dirsWithInsert.length) {
+  const callInsert = () => {
+    for (let i = 0; i < dirsWithInsert.length; i++) {
+      callHook(dirsWithInsert[i], 'inserted', vnode, oldVnode)
+    }
+  }
+  if (isCreate) {
+    mergeVNodeHook(vnode, 'insert', callInsert)
+  } else {
+    callInsert()
+  }
+}
+
+if (dirsWithPostpatch.length) {
+  mergeVNodeHook(vnode, 'postpatch', () => {
+    for (let i = 0; i < dirsWithPostpatch.length; i++) {
+      callHook(dirsWithPostpatch[i], 'componentUpdated', vnode, oldVnode)
+    }
+  })
+}
+ ```
 
 上面可以看出v-model指令真正的实现就是添加了一个value作为prop和input事件，写法等同于：
 ```
