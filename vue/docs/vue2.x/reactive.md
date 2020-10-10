@@ -61,9 +61,9 @@ cleanupDeps () {
 
 ## 派发更新
 
-setter函数的一个细节，针对没有设置setter方法的属性，Vue直接把新值赋值给`val = obj[key]`的val，这样也实现了对该属性的修改，实际上我们新建一个变量并赋予对象的某个属性值，其实只是赋值的引用，并不是原始值的拷贝，所以修改该变量会同步引发对象属性的修改
+set函数的一个细节，针对没有设置setter方法的属性，Vue直接把新值赋值给`val = obj[key]`的val，这样也实现了对该属性的修改，实际上我们新建一个变量并赋予对象的某个属性值，其实只是赋值的引用，并不是原始值的拷贝，所以修改该变量会同步引发对象属性的修改
 
-派发更新简单来说就是数据修改触发set，然后调用dep实例的notify通知订阅watcher实例列表更新，每个wacther都有一个update方法，该方法在正常情况下会将自身推入队列queue中，然后在下一个tick触发更新，具体点是执行watcher实例的run方法，其中会调用get方法，如果是渲染wathcer会调用传入的updateComponent方法触发重新渲染，关键代码是下面这一句：
+派发更新简单来说就是数据修改触发set，然后调用dep实例的notify通知订阅更新的watcher实例列表触发更新，每个wacther都有一个update方法，该方法在正常情况下会将自身推入队列queue中，然后在下一个tick触发更新，具体点是执行watcher实例的run方法，其中会调用get方法，如果是渲染wathcer会调用传入的updateComponent方法触发重新渲染，关键代码是下面这一句：
 ```
 vm._update(vm._render(), hydrating)
 ```
