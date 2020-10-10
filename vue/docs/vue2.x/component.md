@@ -36,6 +36,7 @@ Vue带编译器版本可以将html解析成JSON串，包含了每个节点的各
 ## 组件生命周期
 
 由于DOM节点的插入是先子节点后父节点，因此，组件间的生命周期是：父created -> 子created -> 子mounted -> 父mounted
+
 销毁组件时，先执行父beforeDestory钩子，然后递归删除子组件，所以先执行子组件的destory钩子再执行父destory钩子
 
 ## 异步组件
