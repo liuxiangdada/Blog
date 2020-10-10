@@ -15,7 +15,7 @@ new Vue时会根据指定的el，或者调用$mount方法找到真实DOM，并�
 
 **vm实例的$vnode和_vnode实际上是父子关系**
 
-**vnode对象的parent对应其在父组件渲染vnode对象上的占位符vnode**
+**子组件渲染vnode的parent对应父组件上子组件的占位符vnode**
 
 在递归渲染的过程中，通过闭包保存每次渲染的父实例，以此调用父组件的数据方法，子组件patch完成后，恢复父组件的渲染
 
