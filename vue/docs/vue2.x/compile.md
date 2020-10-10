@@ -170,7 +170,7 @@ _l(data, function(item, index) { return genElement })
 
 文本节点的情况在genText方法内部使用`_v()`生成文本节点
 
-genChildren针对只包含唯一v-for子节点的情况，直接调用genElement进行优化
+genChildren针对只包含唯一v-for子节点的情况，直接调用genElement进行优化，避免了去遍历children数组和判断节点类型
 
 genChildren的结果是使用`[]`包裹起来的子节点数组，作为_c的第三个参数
 
