@@ -12,7 +12,52 @@ Vue在初始化过程中，会把props和data都变成响应式对象，如果�
 
 get的依赖收集实现的很巧妙，借用了Dep这个中间类，每个被监听的属性都实例化了这个类dep并作为闭包保存在内存中，dep对象负责记录哪些watcher使用了该属性，具体做法是调用闭包dep对象的depend方法，在之前Dep类维护了一个全局静态变量`target`，记录当前渲染/计算的watcher，所以depend方法实际上是把自身（dep）作为参数传入Dep.target的addDep方法中，然后在当前渲染watcher的addDep方法中将自身（watcher）添加到闭包dep的subs数组中
 
-听起来有点绕，为啥不直接把Dep.target加到subs中呢？这是因为我们还需要在watcher实例中处理这个dep，举一个很常见的例子，一个数据在模板中多次使用，这样每次使用都会触发addDep，这时就需要在watcher实例中用newDepIds记录当前已经被订阅过的数据，下次跳过避免重复订阅；另一个例子是如果我们进行条件渲染，模板两个地方使用的数据部分不同，就会存在前一次渲染中用到的数据后面已经不再使用的情况，即这些数据的变化已经对渲染无用了，这时就需要移除这些数据上的订阅：具体做法是在cleanupDeps方法中，每次watcher实例收集完依赖时，就判断上次渲染的数据deps中有哪些是这次渲染的数据newDepIds中不存在的，不存在则移除该订阅，并保存当前渲染数据到deps和depIds，最后清空newDeps和newDepIds，方便下次渲染
+听起来有点绕，为啥不直接把Dep.target加到subs中呢？这是因为我们还需要在watcher实例中处理这个dep，我们在`watcher.js`中初始化了这几个属性，下面用例子来解释它们的作用
+```
+this.deps = [] // 上一次渲染用到的每个属性的闭包dep集合
+this.newDeps = [] // 当前渲染用到的每个属性的闭包dep集合
+this.depIds = new Set() // 上一次渲染用到的每个属性的闭包id集合
+this.newDepIds = new Set() // 当前渲染用到的每个属性的闭包id集合
+```
+
+举一个很常见的例子，一个数据在模板中多次使用，这样每次使用都会触发addDep，这时就需要在watcher实例中用newDepIds和newDeps记录当前已经被订阅过的数据，通过depIds判断避免重复订阅
+```
+addDep (dep: Dep) {
+  const id = dep.id
+  if (!this.newDepIds.has(id)) {
+    this.newDepIds.add(id)
+    this.newDeps.push(dep)
+    // 避免重复订阅
+    if (!this.depIds.has(id)) {
+      dep.addSub(this)
+    }
+  }
+}
+```
+
+另一个例子是如果我们进行条件渲染，模板两个地方使用的数据部分不同，就会存在前一次渲染中用到的数据后面已经不再使用的情况，即这些数据的变化已经对渲染无用了，这时就需要移除这些数据上的订阅：具体做法是在cleanupDeps方法中，每次watcher实例收集完依赖时，就判断上次渲染的数据deps中有哪些是这次渲染的数据newDepIds中不存在的，不存在则移除该订阅，并保存当前渲染数据到deps和depIds，最后清空newDeps和newDepIds，方便下次渲染
+```
+cleanupDeps () {
+  let i = this.deps.length
+  // 当原来更新过的属性已经不在本次渲染用到的数据集合中时，将该属性的订阅移除，防止无谓的渲染
+  while (i--) {
+    const dep = this.deps[i]
+    if (!this.newDepIds.has(dep.id)) {
+      dep.removeSub(this)
+    }
+  }
+  // 把newDepIds和newDeps赋值给depIds和deps，然后清空newDepIds和newDeps
+  // 也就是说每次都删除上次的订阅，保留当前订阅
+  let tmp = this.depIds
+  this.depIds = this.newDepIds
+  this.newDepIds = tmp
+  this.newDepIds.clear()
+  tmp = this.deps
+  this.deps = this.newDeps
+  this.newDeps = tmp
+  this.newDeps.length = 0
+}
+```
 
 ## 派发更新
 
