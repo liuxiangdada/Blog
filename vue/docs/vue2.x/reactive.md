@@ -79,7 +79,7 @@ if (setter) {
 }
 ```
 
-派发更新简单来说就是数据修改触发set，然后调用dep实例的notify通知订阅更新的watcher实例列表触发更新，每个wacther都有一个update方法，该方法在正常情况下会将自身推入队列queue中，然后在下一个tick触发更新，具体点是执行watcher实例的run方法，其中会调用get方法，如果是渲染wathcer会调用传入的updateComponent方法触发重新渲染，关键代码是下面这一句：
+派发更新简单来说就是数据修改触发set，然后调用dep实例的notify通知订阅更新的watcher实例列表，触发其更新，每个wacther都有一个update方法，该方法在正常情况下会将自身推入队列queue中，然后在下一个tick触发更新，具体点是执行watcher实例的run方法，其中会调用get方法求值，如果是渲染wathcer其`getter`就是updateComponent，因此会调用传入的updateComponent方法触发重新渲染，关键代码是下面这一句：
 ```
 vm._update(vm._render(), hydrating)
 ```
@@ -87,29 +87,39 @@ vm._update(vm._render(), hydrating)
 注意，其中的_render函数会在生成VNode节点时引用数据，再一次进行依赖收集，其实首次渲染时也会执行，进行初次的依赖收集
 
 派发更新使用队列进行了渲染的优化，首先使用has数组记录wathcer的id确保不会重复添加（其实并不能完全避免，后面会提），然后使用waiting变量避免不会重复触发flushSchedulerQueue，这个设计很巧妙，因为JS是单线程的，所以在执行`nextTick(flushSchedulerQueue)`前，把waiting置为true，确保后面调用queueWatcher方法不会再执行nextTick，这样就能把数据的更新渲染统一推迟到下一个tick执行，提高效率
+```
+if (!waiting) {
+  waiting = true
 
-执行flushSchedulerQueue时，首先对queue进行从小到大排序，这是出于先父后子、先用户watcher后渲染watcher、父watcher在run时会销毁子watcher三点考虑的，接着遍历queue，这里做了一个无限渲染判断，即我们思考这样一种情形，在用户watcher监听某个数据时，其回调再次修改了该数据，这会导致在执行回调时又一次触发queueWatcher并将该用户watcher插入queue从而陷入无限循环，Vue在检查到某个wathcer的id被run了100次以上时会主动跳出遍历并报错
+  if (process.env.NODE_ENV !== 'production' && !config.async) {
+    flushSchedulerQueue()
+    return
+  }
+  nextTick(flushSchedulerQueue)
+}
+```
+
+执行flushSchedulerQueue时，首先对queue进行从小到大排序，这是出于`先父后子`、`先用户watcher后渲染watcher`、`父watcher在run时会销毁子watcher`三点考虑的，接着遍历queue，这里做了一个无限渲染判断，即我们思考这样一种情形，在用户watcher监听某个数据时，其回调再次修改了该数据，这会导致在执行回调时又一次触发queueWatcher并将该用户watcher插入queue从而陷入无限循环，Vue在检查到某个wathcer的id被run了100次以上时会主动跳出遍历并报错
 
 ## nextTick
 
 nextTick的实现利用了JS的事件循环，针对浏览器的支持情况不断降级，先尝试Promise，不支持再尝试MutationObserver，接着setImmediate，最后setTimeout，执行的nextTick将回调函数推入callbacks回调队列并在下一tick同步执行
 
-由于Vue内部更新时也使用了nextTick，如果我们调用其外部接口，渲染的回调和用户回调会按照推入callback的先后依次执行，这表明我们最好在修改数据后再调用nextTick获取修改后的数据
+由于Vue内部更新时也使用了nextTick，如果我们主动调用nextTick，渲染的回调和用户回调会按照推入callback的先后依次执行，这表明我们最好在修改数据后再调用nextTick获取修改后的数据
 
 ## 响应式对象的注意事项
 
 在把对象包装成响应式对象时，会检测对象中某个属性的值是否仍为对象，满足则会对该值进行响应式，这意味着我们在初次渲染时就会对所有使用的数据（包括嵌套对象和数组）都收集依赖，这其实已经可以满足一些需求了，但我们注意到，Vue在收集依赖时还会判断当前操作响应式对象的某个属性是否为对象，并调用子对象的observe对象上的dep属性进行依赖收集，这看起来不明就里，按照常理该嵌套对象已经是响应式对象，其内部的每个属性都可以通过其闭包dep派发更新了，那么这个‘多余的dep属性’是用在哪里呢？
 
-我们知道由于JS的限制（插一句，对于对象，由于是在初始化的时候就转化了data、prop中的数据，所以后来的属性不具备响应式是正常的，但是对于数组来说，我们操作下标修改数组元素无法获得响应式是不合常理的，由源码可知，Vue并没有对数组的key进行响应式，而是直接对元素进行响应式，Vue的开发者尤大回应是由于性能原因，推测我们一般是使用数组来储存列表这种数据量大的数据，相对于对象来说，一个个转化响应式的开销不值得，不如在有需要时调用API触发响应式，另一个原因是数组的长度不可控制，容易引发意料之外的问题），Vue无法跟踪新增属性和直接操作数组下标所引发的变化，那么我们就需要实现API来手动触发，Vue暴露了set函数，内部流程是根据入的参数修改对象，然后把该新值转化为响应式属性，由于我们无法在definReactive函数外部取得闭包dep，当前操作的响应式对象的ob属性中保存的dep属性就有用了，通过它派发更新就能触发重新渲染
+我们知道由于JS的限制（插一句，对于对象，由于是在初始化的时候对data、prop中的数据进行响应式，所以后来的属性不具备响应式是正常的，但是对于数组来说，我们操作下标修改数组元素无法获得响应式是不合常理的，由源码可知，Vue并没有对数组的key进行响应式，而是直接对元素进行响应式，Vue的开发者尤大回应是由于性能原因，推测我们一般是使用数组来储存列表这种数据量大的数据，相对于对象来说，一个个转化响应式的开销不值得，不如在有需要时调用API触发响应式，另一个原因是数组的长度不可控制，容易引发意料之外的问题），Vue无法跟踪新增属性和直接操作数组下标所引发的变化，那么我们就需要实现API来手动触发，Vue暴露了set函数，内部流程是根据传入的参数修改对象，然后把该新值转化为响应式属性，由于我们无法在definReactive函数外部取得闭包dep，当前操作的响应式对象的ob属性中保存的dep属性就有用了，通过它派发更新就能触发重新渲染
 
 准确来说dep对象在响应式对象本身是保存在__ob__属性的dep属性中的，而在属性上则是通过闭包存在内存中
 
 ## props
 
 ### 初始化
-Vue的Props数据也是响应式的，我们通过在父组件修改传入的数据，就能触发子组件的重新渲染，那么它是如何实现的呢？
 
-首先我们对于组件的props选项在合并组件配置时，会进行规范，因为我们可以传入数组或者对象作为props，数组情况我们把其中的每个元素作为key，值为包含属性`type: null`的对象；而对于对象，则看每个key的值是否是对象，如果是构造函数，则直接将值转化成属性形如`type: Boolean`的对象
+首先我们对于组件的props选项在合并组件配置时，会进行规范，因为我们可以传入数组或者对象作为props，数组情况我们把其中的每个元素作为key，转化为值为包含属性`type: null`的对象；而对于对象，则看每个key的值是否是对象，如果是则直接将值转化成属性形如`type: Boolean`的对象
 
 规范化后的props是一个对象，其内部每个key的值也为对象，接着我们在initState中处理规范后的props对象，首先校验每个prop是否符合prop定义
 - 如果key的类型是Boolean，单独处理，这块逻辑有点乱，下面详细讲
@@ -141,7 +151,7 @@ Vue的Props数据也是响应式的，我们通过在父组件修改传入的数
 
 computed和watch其本质都是watcher实例，我们在定义computed、watch或者调用watchAPI时都是实例化watcher并在取值期间进行依赖收集，这样数据变更时就能马上重新计算或执行回调
 
-对于computed来说，它生成的watcher的lazy属性是为真的，这和普通的wathcer有两点不同，一是在实例化时不会马上求值，而是等到被引用时才求值，求值结果保存在wathcer的value属性中，只有等到其内部依赖变化时才会重新求值并把当前引用它的watcher实例进行依赖收集；二是派发更新时不会执行run方法，只是重置dirty属性以便重新求值
+对于computed来说，它生成的watcher的lazy属性是为真的，这和普通的wathcer有两点不同，一是在实例化时不会马上求值，而是等到被引用时才求值，求值结果保存在wathcer的value属性中，只有等到其内部依赖变化时才会重新求值并找到当前引用它的watcher实例进行依赖收集；二是派发更新时不会执行run方法，只是重置dirty属性以便重新求值
 
 更新：computed有过两个版本的变更，原来的实现是只要computed内部的数据变化了就重新求值，如果是在模板中使用了则会重新渲染页面；后面针对这个点进行了优化，实现后可以做到只有在computed的计算结果更新时才触发页面渲染，然而后面的实现引发了一系列BUG，具体见 [8446](https://github.com/vuejs/vue/issues/8446)，最终回退为原实现
 
