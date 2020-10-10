@@ -96,6 +96,17 @@ function formatMatch (record: ?RouteRecord): Array<RouteRecord> {
 ```
 
 在`router-view`组件的渲染函数中，定义了data的`routerView`属性，它代表这个是一个RouterView组件，这样在渲染视图的过程中，如果再次发现`router-view`视图组件就会根据`routerView`属性向前寻找，找出当前`router-view`的嵌套深度并从`matched[depth]`拿到对应`RouteRecord`
+```
+  let depth = 0
+  while (parent && parent._routerRoot !== parent) {
+    const vnodeData = parent.$vnode ? parent.$vnode.data : {}
+    if (vnodeData.routerView) {
+      depth++
+    }
+    parent = parent.$parent
+  }
+  data.routerViewDepth = depth
+```
 
 之所以可以通过计数的方式来寻找嵌套路由对应的组件是因为我们在定义路由和渲染路由时的层级是一一对应的，只要你定义了多个层级的嵌套路由，在视图中就会按顺序出现多个`router-view`
 ```
