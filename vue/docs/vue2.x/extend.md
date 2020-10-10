@@ -97,7 +97,7 @@ if (dirsWithPostpatch.length) {
 }
  ```
 
-上面可以看出v-model指令真正的实现就是添加了一个value作为prop和input事件，写法等同于：
+上面的分析可以看出v-model指令真正的实现就是添加了一个value作为prop和input事件，写法等同于：
 ```
 <input :value="message" @input="if($event.target.composing)return;message=$event.target.value">
 ```
