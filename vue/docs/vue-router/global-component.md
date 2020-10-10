@@ -118,7 +118,13 @@ const routes = [
     children: [
       {
         path: 'bar',
-        component: Bar
+        component: Bar,
+        children: [
+          {
+            path: 'baz',
+            component: Baz,
+          }
+        ]
       }
     ]
   }
@@ -128,6 +134,14 @@ const routes = [
 const Foo = {
   template: '<div>' +
   '<router-link to="/foo/bar">Bar</router-link>' +
+  '<br>' +
+  '<router-view></router-view>' +
+  '</div>'
+}
+
+const Bar = {
+  template: '<div>' +
+  '<router-link to="/foo/bar/baz">Baz</router-link>' +
   '<br>' +
   '<router-view></router-view>' +
   '</div>'
