@@ -15,6 +15,15 @@ DOM事件通过解析模板上绑定的属性，提取出修饰符，提前插�
 ### 组件原生事件
 
 组件上可以绑定原生事件，在编译时会判断native修饰符并将其加入到ast节点的nativeOn属性中保存，不同于on属性，在组件vnode创建时，会把on属性赋值给listeners走自定义事件逻辑，而将nativeOn属性赋值给data.on走DOM事件逻辑，因为DOM节点的挂载是先子后父，所以等到子组件拿到elm真实节点后才会进行事件的绑定（发生在initComponent方法调用的created钩子中），所以这个时候原生事件会直接绑定在子组件的根节点上
+```
+vnode.elm = vnode.componentInstance.$el
+if (isPatchable(vnode)) {
+  invokeCreateHooks(vnode, insertedVnodeQueue)
+  setScope(vnode)
+}
+```
+
+这里调用`invokeCreateHooks`方法就会去平台的`event.js`文件中找到事件的create钩子函数，执行`updateDOMListeners`方法绑定事件
 
 ### 自定义事件
 
