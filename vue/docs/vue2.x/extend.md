@@ -102,7 +102,7 @@ if (dirsWithPostpatch.length) {
 <input :value="message" @input="if($event.target.composing)return;message=$event.target.value">
 ```
 
-所以我们自己实现上面的代码和v-model是一样的，区别在于`if($event.target.composing)return;`这一句，一般而言，我们修改input值会立即出发input事件修改prop，但我们输入中文时会有一个确认的过程，这时其实并不希望出发input方法，Vue正是帮我们做了这件事
+所以我们自己实现上面的代码和v-model是一样的，区别在于`if($event.target.composing)return;`这一句，一般而言，我们修改input值会立即触发input事件修改prop，但我们输入中文时会有一个确认的过程，这时其实并不希望触发input方法，Vue正是帮我们做了这件事
 
 前面提到在inserted钩子中监听了`compositionstart`事件和`compositionend`事件，在输入合成开始时将composing置为true，这样就无法进入input事件的赋值逻辑，等到输入合成结束触发compositionend事件再手动触发input事件进行赋值
 
