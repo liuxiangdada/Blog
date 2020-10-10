@@ -81,4 +81,44 @@ const route = parent.$route
 
 2.路由切换后是如何找到对应的组件的，嵌套路由又是如何处理的？
 
-在`router-view`组件的渲染函数中，我们定义了data的`routerView`属性代表这个是一个RouterView组件，
+路由切换后我们通过`this.$route`拿到当前路由对象，其`matched`属性中就存放着组件对象配置，如果不是嵌套`router-view`，我们就可以取第一个组件进行渲染，这里要注意，由于命名视图的存在，我们在取组件时可以传入name指定渲染某个组件，默认渲染名为`default`的组件
+
+如果存在嵌套路由，说明我们在定义路由时在某条路由配置下提供了`children`属性，以此为基础会得到一棵`RouteRecord`树，在路由切换后，我们的matched经过`formatMatch`方法的处理就会拿到该匹配`RouteRecord`往上寻找的所有父路由配置并且是顺序压入栈的
+```
+function formatMatch (record: ?RouteRecord): Array<RouteRecord> {
+  const res = []
+  while (record) {
+    res.unshift(record)
+    record = record.parent
+  }
+  return res
+}
+```
+
+在`router-view`组件的渲染函数中，我们定义了data的`routerView`属性代表这个是一个RouterView组件，这样在渲染视图的过程中，我们如果再次发现`router-view`视图组件就会向前寻找，找出当前`router-view`的嵌套深度并从`matched[depth]`拿到对应`RouteRecord`
+
+之所以可以通过计数的方式来寻找嵌套路由对应的组件是因为我们在定义路由和渲染路由时的层级是一一对应的，只要你定义了多个层级的嵌套路由，在视图中就会按顺序出现多个`router-view`
+```
+// 路由配置
+const routes = [
+  {
+    path: '/foo',
+    component: Foo,
+    children: [
+      {
+        path: 'bar',
+        component: Bar
+      }
+    ]
+  }
+]
+
+// 对应的html
+const Foo = {
+  template: '<div>' +
+  '<router-link to="/foo/bar">Bar</router-link>' +
+  '<br>' +
+  '<router-view></router-view>' +
+  '</div>'
+}
+```
