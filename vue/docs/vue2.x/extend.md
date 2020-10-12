@@ -216,7 +216,7 @@ transition组件同样是Vue的内置组件，被用来实现节点出现或消�
 
 等到子节点渲染时，在创建后就会触发created钩子，执行_enter方法，该方法首先会检查是否有`data.transition`属性，这样就能过滤掉非transition组件内部的节点，校验通过后提取transition设置的一系列props，接着我们判断`isAppear`是否为真，并且针对是否设置`appear`prop决定要不要首次就进行过渡，然后我们根据props得到enter过渡的一系列类名、钩子函数
 
-这个时候我们添加`enter`和`enter-active`类名，等到nextFrame（浏览器的逐帧刷新机制）回调触发时，首先删除`enter`类名，然后添加`enter-to`类名，接着执行whenTransitionEnds方法，该方法会绑定一个监听函数监听`transitionend`事件并在duration到期后执行定时器回调`end`，内部首先移除监听，然后调用回调cb，cb是我们在前面定义的`_enterCb`方法，该方法，会移除`enter-to`和`enter-active`类
+如果不是首次渲染或者设置了appear参数，就会添加`enter`和`enter-active`类名，等到nextFrame（浏览器的逐帧刷新机制）回调触发时，首先删除`enter`类名，然后添加`enter-to`类名，接着执行whenTransitionEnds方法，该方法会绑定一个监听函数监听`transitionend`事件并在duration到期后执行定时器回调`end`，内部首先移除监听，然后调用回调cb，cb是我们在前面定义的`_enterCb`方法，该方法，会移除`enter-to`和`enter-active`类
 
 节点在移除时会执行leave钩子，流程和_enter钩子是类似的，只不过类名不一样
 
@@ -224,11 +224,68 @@ transition组件同样是Vue的内置组件，被用来实现节点出现或消�
 
 编译阶段：transition组件在数据变更引发内部节点消失时，会在父组件的渲染时把该移除的vnode移除掉（生成render函数时针对v-if指令采取三元运算符），接着进入updateChildComponent方法更新`$slots`，因为移除后会填补一个空白的文本节点，所以在`resolveSlots`被过滤掉，所以下次进入transition的render函数时，已经拿不到子节点了
 
+上面我们提到，会拿到transition内部的第一个子元素并设置一个key值，我们注意到这么一段
+```
+function performLeave () {
+  // the delayed leave may have already been cancelled
+  if (cb.cancelled) {
+    return
+  }
+  // record leaving element
+  if (!vnode.data.show && el.parentNode) {
+    (el.parentNode._pending || (el.parentNode._pending = {}))[(vnode.key: any)] = vnode
+  }
+  beforeLeave && beforeLeave(el)
+  if (expectsCSS) {
+    addTransitionClass(el, leaveClass)
+    addTransitionClass(el, leaveActiveClass)
+    nextFrame(() => {
+      removeTransitionClass(el, leaveClass)
+      if (!cb.cancelled) {
+        addTransitionClass(el, leaveToClass)
+        if (!userWantsControl) {
+          if (isValidDuration(explicitLeaveDuration)) {
+            setTimeout(cb, explicitLeaveDuration)
+          } else {
+            whenTransitionEnds(el, type, cb)
+          }
+        }
+      }
+    })
+  }
+  leave && leave(el, cb)
+  if (!expectsCSS && !userWantsControl) {
+    cb()
+  }
+}
+```
+
+在remove节点触发leave方法时就会调用上面的方法移除类名和监听事件，这里还记录了当前要被操作的vnode，就是根据前面设置的独一无二的key保存在`el.parentNode._pending`中，后面我们在_enter方法中用到了这个属性
+```
+if (!vnode.data.show) {
+  // remove pending leave element on enter by injecting an insert hook
+  // 如果在进入过渡中发现_pending中还有Vnode，则中断过渡立即执行离开回调
+  mergeVNodeHook(vnode, 'insert', () => {
+    const parent = el.parentNode
+    const pendingNode = parent && parent._pending && parent._pending[vnode.key]
+    if (pendingNode &&
+      pendingNode.tag === vnode.tag &&
+      pendingNode.elm._leaveCb
+    ) {
+      pendingNode.elm._leaveCb()
+    }
+    enterHook && enterHook(el, cb)
+  })
+}
+```
+
+在_enter方法内首先给要进入的节点绑定了一个insert钩子，该钩子检测当前vnode是否处于离开的逻辑中，如果离开的过渡还未完成也马上执行回调中断过渡
+
 ## transition-group
 
 transition-group在自定义render中首先拿到props中的tag，如果没有设为span，然后创建一个map保存子节点的key和vnode（所以子节点必须指定key），接着取出子节点，遍历把设置在transition-group上的props作为子节点的`data.transtition`属性，和上面一样，最后根据tag和children创建出一个vnode返回进行渲染
 
-继续渲染，走到vm._update方法时，由于在transition-group组件的beforeMounted钩子中重写了该方法，所以会执行该重写方法，此时当成正常的_update方法即可，这样就渲染出了transition-group中的节点
+继续渲染，走到`vm._update`方法时，由于在transition-group组件的beforeMounted钩子中重写了该方法，所以会执行该重写方法，此时当成正常的_update方法即可，这样就渲染出了transition-group中的节点
 
 在重写的_update方法中执行了两次patch，官方的说法是因为updateChild的算法不稳定，于是在第一次时删除多余的节点，并触发leave钩子，在第二次时，保证留下的节点在它正确的位置
 
@@ -236,7 +293,7 @@ transition-group在自定义render中首先拿到props中的tag，如果没有�
 
 接着我们添加一个元素触发enter逻辑，就会再次进入render函数，这时我们首先保存上次的子节点作为`prevChildren`，注意这时的子节点是比prevChildren多一个的，我们首先对prevChildren进行处理，保存每个节点当前的位置信息到`data.pos`，然后根据tag和children创建出一个vnode返回进行渲染
 
-继续渲染触发_update，增加节点时也走正常update逻辑，由于是新增节点，所以在第一次update时因为比较_vnode和kept（kept下面提）没有什么变化，等到第二次update时，vnode是比_vnode多一个节点的，所以在patchVnode时会在对应位置插入节点，我们在上面transition时提到有_enter钩子方法和remove钩子方法，因为我们前面为每个子节点都添加了`data.transition`属性，所以在插入时就会自动添加`enter`和`enter-active`类
+继续渲染触发_update，增加节点时也走正常update逻辑，由于是新增节点，所以在第一次update时因为比较_vnode和kept（kept下面提）没有什么变化，等到第二次update时，vnode是比_vnode多一个节点的，所以在patchVnode时会在对应位置插入节点，我们在上面transition时提到有_enter钩子方法和remove钩子方法，因为我们前面为每个子节点都添加了`data.transition`属性，所以在插入时就会给每个节点自动添加`enter`和`enter-active`类
 
 这时我们来到transition-group组件的updated生命周期，一开始会检测节点是否定义了moveclass并且class实现和过渡动画相关，如果不满足啥也不干，否则会对子节点执行以下三步
 - 如果我们快速添加节点，则会执行callPendingCbs方法，立即执行moveCb回调和enerCb回调
@@ -247,4 +304,4 @@ transition-group在自定义render中首先拿到props中的tag，如果没有�
 
 ### 删除节点
 
-删除节点重新进入render函数，有一点不同，就是我们在比较map时，会把仍然在的接待保存到`this.kept`，把删除的节点保存到`this.removed`，这样在执行重写的_update方法时，就会在第一次patch在updateChildren时最后删除多余的节点，就会触发leave钩子，在里面添加`leave`和`leave-active`类，第二次update时就已经一样了，接着又走到updated周期钩子，这时和增加节点一样，会先回复原位，然后在回调中复原，最后完成离开的过渡并在_leaveCb方法中移除那个节点
+删除节点重新进入render函数，有一点不同，就是我们在比较map时，会把仍然在的节点保存到`this.kept`，把删除的节点保存到`this.removed`，这样在执行重写的_update方法时，就会在第一次patch在updateChildren时最后删除多余的节点，就会触发leave钩子，在里面添加`leave`和`leave-active`类，第二次update时就已经一样了，接着又走到updated周期钩子，这时和增加节点一样，会先回复原位，然后在回调中复原，最后完成离开的过渡并在_leaveCb方法中移除那个节点
