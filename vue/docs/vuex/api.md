@@ -15,7 +15,7 @@ set state (v) {
 }
 ```
 
-可以看到，我们实际上访问的是`this._vm._data.$$state`，而`$$state`是在生成_vm实例时，传入的`this._modules.root.state`，这样一一映射，我们最终拿到了我们定义的数据
+可以看到，我们实际上访问的是`this._vm._data.$$state`，而`$$state`是在生成_vm实例时，传入的`this._modules.root.state`，这样一一映射最终拿到了我们定义的数据
 
 针对模块内部的数据，Vuex在构建模块树时，会通过`Vue.set(parentState, moduleName, module.state)`挂载到根module上的state中，所以我们可以这样访问模块数据
 ```
@@ -34,6 +34,8 @@ const store = new Vuex.Store({
 
 this.$store.state.a.count // 1
 ```
+
+这里有一点我深入研究了一下，就是为什么使用`Vue.set`来添加模块数据而不是直接`parentState[moduleName] = module.state`，经过调试我发现，如果是后来新增模块，由于`$$state`对象这时已经是响应式对象，给响应式对象新增数据是无法让新数据也变成响应式的，只能使用set方法
 
 而在模块内部访问数据时，我们又不必依照上面这种格式，这是因为我们在本地化的时候，针对`mutations`和`actions`会传入对应模块的state作为参数
 ```
