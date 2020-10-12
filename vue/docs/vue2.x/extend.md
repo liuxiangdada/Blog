@@ -220,6 +220,30 @@ transition组件同样是Vue的内置组件，被用来实现节点出现或消�
 
 节点在移除时会执行leave钩子，流程和_enter钩子是类似的，只不过类名不一样
 
+节点在移除时，由于前后节点类型不一致，会删除老节点，进入`removeAndInvokeRemoveHook`方法，这时由于remove钩子存在，不会立即删除节点，而是等到执行remove钩子时，在监听到transitionend事件后触发回调，在回调中再次调用rm方法，这时才删除节点
+```
+const cb = el._leaveCb = once(() => {
+  if (el.parentNode && el.parentNode._pending) {
+    el.parentNode._pending[vnode.key] = null
+  }
+  if (expectsCSS) {
+    removeTransitionClass(el, leaveToClass)
+    removeTransitionClass(el, leaveActiveClass)
+  }
+  if (cb.cancelled) {
+    if (expectsCSS) {
+      removeTransitionClass(el, leaveClass)
+    }
+    leaveCancelled && leaveCancelled(el)
+  } else {
+    // 在这里调用传入remove钩子的rm方法删除节点
+    rm()
+    afterLeave && afterLeave(el)
+  }
+  el._leaveCb = null
+})
+```
+
 至此，我们完成了css节点在各个时间节点的插入移除过程，保证了过渡的实现，同时在过渡的各个节点执行我们定义的JS钩子函数（如果有的话）
 
 编译阶段：transition组件在数据变更引发内部节点消失时，会在父组件的渲染时把该移除的vnode移除掉（生成render函数时针对v-if指令采取三元运算符），接着进入updateChildComponent方法更新`$slots`，因为移除后会填补一个空白的文本节点，所以在`resolveSlots`被过滤掉，所以下次进入transition的render函数时，已经拿不到子节点了
@@ -304,4 +328,4 @@ transition-group在自定义render中首先拿到props中的tag，如果没有�
 
 ### 删除节点
 
-删除节点重新进入render函数，有一点不同，就是我们在比较map时，会把仍然在的节点保存到`this.kept`，把删除的节点保存到`this.removed`，这样在执行重写的_update方法时，就会在第一次patch在updateChildren时最后删除多余的节点，就会触发leave钩子，在里面添加`leave`和`leave-active`类，第二次update时就已经一样了，接着又走到updated周期钩子，这时和增加节点一样，会先回复原位，然后在回调中复原，最后完成离开的过渡并在_leaveCb方法中移除那个节点
+删除节点重新进入render函数，有一点不同，就是我们在比较map时，会把仍然在的节点保存到`this.kept`，把删除的节点保存到`this.removed`，这样在执行重写的_update方法时，就会在第一次patch在updateChildren时删除多余的节点，就会触发leave钩子，在里面添加`leave`和`leave-active`类，第二次update时就已经一样了，接着又走到updated周期钩子，这时和增加节点一样，会先回复原位，然后在回调中复原，最后完成离开的过渡并在_leaveCb方法中移除那个节点
