@@ -143,7 +143,7 @@ let Child = {
 
 #### 作用域插槽
 
-编译parse阶段，父组件解析ast节点到template标签时，会取得其slot-scope属性保存在子组件占位符ast节点的`slotScope`属性上，并将自身赋值给子组件占位符节点的`scopedSlots`属性，在generate阶段的genData方法中，发现存在scopedSlots属性进入genScopedSlots方法，根据slot名称遍历slotScope属性，对每个template节点都拿到其slot-scope属性指定的参数props，然后构造一个返回template节点子节点的函数，然后把函数和key以对象数组的形式传入resolveScopedSlots方法中处理，并作为子组件的data属性返回，generate后生成`scopedSlots: _u([{ key: 'header', fn: function (props) { return _c('p', [_v(_s(props.text))]) } }])`的code
+编译parse阶段，父组件解析ast节点到template标签时，会取得其slot-scope属性保存在自身ast节点的`slotScope`属性上，并在子组件占位符节点的`scopedSlots`属性上添加该template节点，在generate阶段的genData方法中，发现存在scopedSlots属性进入genScopedSlots方法，根据slot名称遍历slotScope属性，对每个template节点都拿到其slot-scope属性指定的参数props，然后构造一个返回template节点子节点的函数，然后把函数和key以对象数组的形式传入resolveScopedSlots方法中处理，并作为子组件的data属性返回，generate后生成`scopedSlots: _u([{ key: 'header', fn: function (props) { return _c('p', [_v(_s(props.text))]) } }])`的code
 
 子组件在编译时处理`slot`标签时，跟具名插槽不一样的是会从节点的attrs属性中拿到子组件中传递的数据作为props，`_t("default",null,{"text":"Hello","msg":msg})`代码中第三个参数即为props
 
