@@ -88,3 +88,53 @@ this.mode = mode
 - onReady，注册一个回调，在完成初始导航时调用，这意味着它能处理异步钩子和异步组件
 - onError，注册一个回调，在导航发生错误时调用
 
+## 实例
+
+在`install.js`文件中，我们把当前组件实例作为参数传入registerInstance方法
+```
+const registerInstance = (vm, callVal) => {
+  let i = vm.$options._parentVnode
+  if (isDef(i) && isDef(i = i.data) && isDef(i = i.registerRouteInstance)) {
+    i(vm, callVal)
+  }
+}
+```
+而registerInstance方法实际上是调用`data.registerRouteInstance`，这个方法定义在`src/components/view.js`文件routerView组件的render函数中
+```
+data.registerRouteInstance = (vm, val) => {
+  // val could be undefined for unregistration
+  const current = matched.instances[name]
+  if (
+    (val && current !== vm) ||
+    (!val && current === vm)
+  ) {
+    matched.instances[name] = val
+  }
+}
+```
+
+可以看到，本质上是往当前路由的matched属性上添加instances数组，记录当前路由匹配的组件实例以及其父路由匹配的组件实例，那么记录下来后，我们在哪里使用这个实例呢
+
+我们注意到，在`beforeRouterEnter`导航守卫中，我们可以在next中拿到vm实例，其实它是调用poll方法传入的
+```
+function poll (
+  cb: any, // somehow flow cannot infer this is a function
+  instances: Object,
+  key: string,
+  isValid: () => boolean
+) {
+  if (
+    instances[key] &&
+    !instances[key]._isBeingDestroyed // do not reuse being destroyed instance
+  ) {
+    // 根据组件名找到对应的组件实例，传入回调
+    cb(instances[key])
+  } else if (isValid()) {
+    setTimeout(() => {
+      poll(cb, instances, key, isValid)
+    }, 16)
+  }
+}
+```
+
+poll方法我们后面会讲，它主要是在导航完成的nextTick中执行，因为这时我们已经生成了组件实例
