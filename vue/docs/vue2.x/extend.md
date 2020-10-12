@@ -194,7 +194,7 @@ keep-alive组件是内置组件，在initGlobalAPI方法中作为全局组件被
 
 值得一提的是render函数中取内部组件的方式和`slot`是类似的，所以可理解为keep-alive是另类的slot使用
 
-keep-alive组件还定义三个props：`include/exclude/max`用于配置哪些组件是否需要被缓存以及最大缓存组件数，在mounted钩子中对`include/exclude`进行监听，把不需要缓存的vnode销毁并从cache中移除，在移除时利用LRU思想做了优化，每次命中缓存就会把命中的vnode的key放到keys数组的末尾，这样在移除时只需要移除栈底的元素就是最久没被使用的vnode
+keep-alive组件还定义三个props：`include/exclude/max`用于配置哪些组件是否需要被缓存以及最大缓存组件数，在mounted钩子中对`include/exclude`进行监听，把不需要缓存的vnode销毁并从cache中移除，在移除时利用LRU思想做了优化，每次命中缓存就会把命中的vnode的key放到keys数组的末尾，这样在移除时移除的第一个元素就是最久没被使用的vnode
 
 ### keep-alive组件的初次渲染
 
