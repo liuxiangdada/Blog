@@ -139,7 +139,7 @@ let Child = {
 
 子组件编译阶段处理`slot`标签时，会记录`slotName`并在genSlot中将slotName传入`_t -> renderSlots`方法中，最后得到形如`_t('header', children)`的code，children指代递归生成的插槽默认的子vnode节点
 
-接下来在子组件初始化化initRender方法中，会取得子组件的占位符vnode中的children，以slot名称为键赋值给实例的`$slots`属性，形如`vm.$slots = { header: [VNode] }`，然后在renderSlot方法中，将$slot属性中对应slotName的子节点返回到子组件的渲染函数中渲染出来
+接下来在子组件初始化initRender方法中，会取得子组件的占位符vnode中的children，以slot名称为键赋值给实例的`$slots`属性，形如`vm.$slots = { header: [VNode] }`，然后在renderSlot方法中，将$slot属性中对应slotName的子节点返回到子组件的渲染函数中渲染出来
 
 #### 作用域插槽
 
