@@ -219,6 +219,19 @@ git push -u <主机名> <本地分支名>:<远程分支名>
 
 ![rebase合并](../img/basic-rebase-3.png)
 
+我们在使用时可以在本地进行分支合并，然后对你需要同步的某个远程分支对应的本地分支进行rebase变基，例子如下
+```
+git checkout -b feature/test
+
+git commit -a -m 'test commit'
+
+git checkout master
+
+git merge feature/test
+
+git rebase
+```
+
 高阶用法
 
 ```
