@@ -219,7 +219,7 @@ git push -u <主机名> <本地分支名>:<远程分支名>
 
 ![rebase合并](../img/basic-rebase-3.png)
 
-我们在使用时可以在本地进行分支合并，然后对你需要同步的某个远程分支对应的本地分支进行rebase变基，例子如下
+我们在使用时可以在本地进行分支合并，然后对你需要同步的某个远程分支对应的本地分支进行rebase变基，这样做的好处是可以避免一次合并提交，使得提交看起来简洁，操作如下
 ```
 git checkout -b feature/test
 
@@ -230,6 +230,19 @@ git checkout master
 git merge feature/test
 
 git rebase
+```
+
+如果我们遇到签出功能分支开发时又需要合并最新的主分支代码的情况，可以对功能分支基于主分支变基，这样就能拿到最新的主分支代码并在其基础上继续功能的开发，操作如下：
+```
+git checkout feature/test
+
+git commit -a -m 'test commit'
+
+git checkout master && git pull
+
+git checkout feature/test
+
+git rebase master
 ```
 
 高阶用法
