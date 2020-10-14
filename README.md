@@ -10,6 +10,8 @@
 
 [软件工程](./software/index.md)
 
+[算法](./algorithm/index.md)
+
 
 ## 工程化
 
@@ -31,6 +33,8 @@
 
 [Leetcode题解](./leetcode-solving/index.md)
 
+## 工作
 
+[项目](./project/index.md)
 
 
