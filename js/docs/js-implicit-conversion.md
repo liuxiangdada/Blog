@@ -1,11 +1,13 @@
 JS的数据类型可分为原始类型和对象类型，原始类型有`string`、`number`、`boolean`，其中又有两个特殊的原始值代表各自特殊数据类型的唯一成员`null`和`undefined`，对象类型有`object`，此外，近几年定义了两种新的数据类型`symbol`、`bigint`
 
 我们可以通过`typeof`运算符来大致判断其是哪种数据：
+
 ![typeof运算结果](./../img/conversion_1.PNG)
 
 图中的结果有几个表现不一致的地方，对数组的判断是`object`，对null的判断是`object`，对函数的判断是`function`（我们知道JS中函数也是对象）
 
 我们可以使用更加严谨的`Object.prototype.toString.call`来获取精确的判断
+
 ![toString运算结果](./../img/conversion_2.PNG)
 
 所以我们可以封装一个更精确判断数据类型的方法
