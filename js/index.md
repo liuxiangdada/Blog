@@ -1,5 +1,7 @@
 [JS的前世今生](./docs/js-introduce.md)
 
+[JS的隐式转换](./docs/js-implicit-conversion.md)
+
 [JS数组方法实现](./docs/js-array-methods.md)
 
 [JS常用方法实现](./docs/js-methods.md)
