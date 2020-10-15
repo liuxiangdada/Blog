@@ -6,7 +6,7 @@ JS的数据类型可分为原始类型和对象类型，原始类型有`string`�
 
 ![typeof运算结果](./../img/conversion_1.PNG)
 
-图中的结果有两个表现不一致的地方，对null的判断是`object`（这时typeof实现的一个BUG），对函数的判断是`function`（我们知道JS中函数也是对象，所以这不合理）
+图中的结果有两个表现不一致的地方，对null的判断是`object`（这是typeof实现的一个BUG），对函数的判断是`function`（我们知道JS中函数也是对象，所以这不合理）
 
 我们可以使用更加严谨的`Object.prototype.toString.call`来获取精确的判断
 
@@ -44,6 +44,32 @@ function isType (val, expected) {
 我们使用`!!`运算符的规则测试，除了下面几种情况，其他都为`true`
 
 ![原始值转布尔值](./../img/conversion_5.PNG)
+
+## symbol和bigint
+
+对于这两个后来的类型，JS为这两个类型定义了不同的转化逻辑
+
+定义的`Symbol`类型值具有`Symbol.toPrimitive`方法，该方法不论传入`hint`是什么都返回同一个字符串
+```
+let s = Symbol('s')
+
+String(s) // Symbol(s)
+Number(s) // error, can't convert symbol to number
+
+s[Symbol.toPrimitive]() // Symbol(s)
+```
+
+定义的`bigint`类型不具有`Symbol.toPrimitive`方法，但它具有`valueOf`方法和`toString`方法，表现如下
+```
+let num = 1n
+
+num.toString() // 1
+num.valueOf() // 1n
+
+String(num) // 1
+Number(num) // 1
++num // error, can't convert bigint to number
+```
 
 ## 对象转原始值
 
