@@ -36,7 +36,7 @@ ECMAScript3.1这个命名并没有持续很久，在会后被更名为ECMAScript
 
 由于`Brendan Eich`设计的时间很短，导致JS语言存在许多的不合理之处，起初由于其解决了网页的痛点而被广泛关注并使用，规模爆炸式的增加使得JS迅速被固化下来，同时缺陷也被一并保留下来，下面我们总结一下
 
-1.null和undefined，这两个类似但又不同的值，null表示空对象，undefined表示变量未定义
+1.null和undefined，这两个类似但又不同的值，null表示一个代表无、空或者值未知的特殊值，undefined表示变量未定义
 
 ```
 typeof null // object
