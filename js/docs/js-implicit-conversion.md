@@ -27,7 +27,7 @@ function isType (val, expected) {
 
 当我们需要一个字符串形式的值时，就会进行字符串转换，此外，我们可以显式调用`String`来将值转换成字符串
 
-![原始值转字符串结果](./../img/conversion_3.PNG)
+![原始值转字符串](./../img/conversion_3.PNG)
 
 **注意`bigint`类型和`symbol`类型的特殊情况，我们后面讲**
 
@@ -35,7 +35,7 @@ function isType (val, expected) {
 
 在算数函数和表达式中，会自动进行number类型转换，此外，我们可以显式调用`Number`来将值转换成数字
 
-![原始值转数字](./../img/conversion_5.PNG)
+![原始值转数字](./../img/conversion_4.PNG)
 
 如果一个值转换后不是有效数字，结果将会是`NaN`，对于`null`值在转换时变成`0`，而`undefined`变成`NaN`
 
@@ -43,7 +43,7 @@ function isType (val, expected) {
 
 我们使用`!!`运算符的规则测试，除了下面几种情况，其他都为`true`
 
-![数据转布尔值](./../img/conversion_11.PNG)
+![原始值转布尔值](./../img/conversion_5.PNG)
 
 ## 对象转原始值
 
@@ -114,7 +114,7 @@ let obj = {
 
 接着我们在浏览器中验证一下
 
-![toPrimitive方法转换](./../img/conversion_22.PNG)
+![toPrimitive方法转换](./../img/conversion_6.PNG)
 
 #### toString和valueOf
 
@@ -146,7 +146,7 @@ let obj = {
 
 下面验证一下
 
-![toString/valueOf方法转换](./../img/conversion_22.PNG)
+![toString/valueOf方法转换](./../img/conversion_6.PNG)
 
 我们发现和上面的结果是一样的，符合预期
 
@@ -170,4 +170,4 @@ String(new Date())
 
 1.位于句首的`{}`会被当成代码块并被忽略
 
-![奇葩情况1](./../img/conversion_19.PNG)
+![奇葩情况1](./../img/conversion_7.PNG)
