@@ -2,7 +2,7 @@
 
 `router-link`是VueRouter内置的全局组件，和HTML中的`a`标签类似（其实组件内部实现时的默认承载标签也是a），用作路由导航，之所以封装一个全新的组件，一个原因是丰富原来链接标签的功能，另一个是统一浏览器在不同路由模式下的行为
 
-`router-link`的工作原理是重写了`render`函数，我们通过组件的`to`参数，获得需要导航的路径原始信息，然后调用`router.resolve`方法解析出目标路径`route`和最终跳转的`href`，接着判断当前路由和组件要跳转的路径是否相同或者是否存在包含关系，添加`activeClass`类和`exactActiveClass`类，接着调用`router.push`或`router.replace`封装一个点击事件`handler`，最后调用`h`方法创建一个组件VNode并返回
+`router-link`的工作原理是重写了`render`函数，我们通过组件的`to`参数，获得需要导航的路径原始信息，然后调用`router.resolve`方法解析出目标路径`route`和最终跳转的`href`，接着判断当前路由和组件要跳转的路径是否相同或者是否存在包含关系，添加`activeClass`类和`exactActiveClass`类，接着封装一个点击事件`handler`，内部调用`router.push`或`router.replace`，最后调用`h`方法创建一个组件VNode并返回
 
 有两个细节要注意，一个是绑定的事件做了一些前置处理
 ```
@@ -95,7 +95,7 @@ function formatMatch (record: ?RouteRecord): Array<RouteRecord> {
 }
 ```
 
-在`router-view`组件的渲染函数中，定义了data的`routerView`属性，它代表这个是一个RouterView组件，这样在渲染视图的过程中，如果再次发现`router-view`视图组件就会根据`routerView`属性向前寻找，找出当前`router-view`的嵌套深度并从`matched[depth]`拿到对应`RouteRecord`
+在`router-view`组件的渲染函数中，定义了data的`routerView`属性，它代表这个是一个RouterView组件，这样在渲染视图的过程中，如果再次发现`router-view`视图组件就会根据`routerView`属性向前寻找，找出当前`router-view`的嵌套深度并根据`matched[depth]`拿到对应`RouteRecord`
 ```
   let depth = 0
   while (parent && parent._routerRoot !== parent) {

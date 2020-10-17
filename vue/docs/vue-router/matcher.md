@@ -63,7 +63,7 @@ declare type Route = {
 
 `Route`对象就是我们在VueRouter插件中切换的路径对象，它大部分属性和`Location`对象相同，用来记录路径的信息，其中最重要的属性是`matched`，这个数组中存放着前面的`RouteRecord`
 
-我们试着用这三个概念来描述一下路径切换的过程，首先我们编写路由配置`routes`，在`createMatcher`方法中构建出`RouteRecord`树，当我们要切换路径时，我们输入一个路径，该路径可以是字符串或者对象，但最终都会被规范成`Location`对象，我们根据`Location`对象和当前路径`current`，调用`match`方法就能匹配出新的路径，然后我们根据新路径中的`matched`数组中的`RouteRecord`，就能拿到组件配置，触发组件导航守卫，渲染出组件
+我们试着用这三个概念来描述一下路径切换的过程，首先我们编写路由配置`routes`，在`createMatcher`方法中构建出`RouteRecord`树，当我们要切换路径时，我们输入一个路径，该路径可以是字符串或者对象，但最终都会被规范成`Location`对象，我们根据`Location`对象和当前路径`current`，调用`match`方法就能匹配出新的路径，然后我们根据新路径中的`matched`数组中的`RouteRecord`，就能拿到组件配置，触发组件导航守卫，之后渲染出组件
 
 ## match
 

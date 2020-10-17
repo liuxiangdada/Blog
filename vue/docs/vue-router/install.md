@@ -59,7 +59,7 @@ this.matcher = createMatcher(options.routes || [], this)
 
 这里最重要的就是根据用户传入的路由配置生成的路由匹配器`matcher`，它的创建过程和作用我会在后面单独分析
 
-接着我们根据`options.mode`参数决定使用哪种路由模式，这里做了一个降级优化，如果浏览器不支持`PushState`，则会退化到使用`hash`模式，如果不在浏览器中则使用`abstract`模式
+接着我们根据`options.mode`参数决定使用哪种路由模式，这里做了一个降级优化，如果设置了history模式且浏览器不支持`PushState`则会退化到使用`hash`模式，如果不在浏览器中则使用`abstract`模式
 ```
 let mode = options.mode || 'hash'
 this.fallback =
@@ -88,7 +88,9 @@ this.mode = mode
 - onReady，注册一个回调，在完成初始导航时调用，这意味着它能处理异步钩子和异步组件
 - onError，注册一个回调，在导航发生错误时调用
 
-## 实例
+我们在routes配置中设置component属性，在routeView组件中渲染出来，其实内部是有一个映射关系的，默认组件插入到名为default的routeView组件中，我们可以增加routeView并使用不同的name属性，这样我们就可以设置components属性并指定不同name对应的组件
+
+## registerInstance的作用
 
 在`install.js`文件中，我们把当前组件实例作为参数传入registerInstance方法
 ```
