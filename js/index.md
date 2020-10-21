@@ -24,4 +24,8 @@
 
 [原型链与继承](./docs/js-prototype.md)
 
-[JS基础知识笔记](./docs/js-basic-grammar.md)
+[JS权威指南笔记](./docs/js-definitive-guide.md)
+
+[JS基础知识盲区总结](./docs/js-check-basic.md)
+
+
