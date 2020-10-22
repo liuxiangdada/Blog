@@ -346,3 +346,385 @@ let a = 2
 a++ // 2，先返回再自增
 ++a // 4，先自增再返回
 ```
+
+4.逗号运算符我们使用的很少，但一些情况会使用它写更简短的代码，所以有必要了解一下它的规则，对于用逗号连接的表达式或语句，我们会执行每一条表达式或语句，但最终只返回最后一次计算的值
+```
+1, 2 // 2
+
+let a = (1 + 2, 3 + 4)
+
+console.log(a) // 7
+
+```
+
+逗号运算符的优先级很低，甚至比`=`还要低，所以圆括号是很有必要的
+```
+let a = 1, 2
+
+console.log(a) // 1
+```
+
+### 逻辑运算符
+
+1.`||`运算符在JS中和我们接触到的传统编程语言有些许不同，它会去查找以`||`运算符连接的各个表达式的值，找到第一个出现的真值并返回，如果没有找到，返回最后一个值，虽然在`||`运算符判断时内部会进行布尔转换，但返回时只返回计算值
+```
+let a = null || -1 || undefined
+
+console.log(a) // -1
+
+1 || console.log(1) // 短路运算，永远不会执行console.log
+```
+
+2.`&&`运算符和`||`运算符类似，但它找的是第一个出现的假值
+```
+let a = -1 && null && 0
+
+console.log(a) // null
+```
+
+`&&`运算符要比`||`运算符的优先级高，所以在存在这两者时，我们不必刻意加圆括号
+```
+let a = 1 && 2 || -1 && 10
+
+console.log(a) // 2
+```
+
+3.容易发生误解的地方
+```
+if (-1 || 0) console.log('a') // 'a'，这里判断中的结果为-1
+
+if (null || -1 && 1) console.log('b') // 'b'，这里判断中的结果为1
+```
+
+### Switch语句
+
+1.`switch`语句的一个特点就是可取代多分支选择的`if/else`语句，`switch`语句至少要有一个`case`代码块和一个可选的`default`代码块
+```
+let a = 1
+
+switch(a) {
+  case 1:
+    console.log('found')
+    break
+  default:
+    console.log('not found')
+    break
+}
+```
+
+2.`switch`语句的逻辑时根据传入的参数匹配`case`后面的值，匹配到值后会执行后面的代码直到遇到`break`指令，这里描述的后面的代码不会再下一个`case`块停止，这意味着我们在处理每种情况时最好都加上`break`除非你明白自己在干什么
+```
+let a = 1
+
+switch(a) {
+  case 1:
+    console.log('one')
+  case 1:
+    console.log('two')
+    break
+  default:
+    console.log('not found')
+    break
+}
+
+最终会输出one、two两个结果
+```
+
+### 循环
+
+1.对于`for`循环，除了循环体我们定义了三个部分，分别是`begin`、`condition`、`step`
+```
+for (begin; condition; step) {
+  // 循环体
+}
+```
+
+我们可以省略这三个部分，得到一个无限循环`for (;;)`，要注意两个分号不能省略，否则会产生语法错误
+
+2.标签，我们了解了`continue`和`break`可以跳出当前循环或跳过当次迭代，如果在后面跟上标签则会跳出标签指定的循环或者跳过标签指定循环的当次迭代
+```
+next: for(;;) {
+  for (;;) {
+    break next;
+  }
+}
+
+console.log(1) // 1
+```
+
+## 对象
+
+### 基本定义
+
+1.我们在定义对象属性时有两种方式，一种是点符号，一种是方括号
+```
+let obj = {
+  name: 'liu',
+  age: 23,
+}
+
+obj.name // 'liu'
+
+obj['name'] // 'liu'
+```
+
+点符号只能接属性名，不能跟变量
+```
+let n = 'name'
+
+obj.n // undefined
+```
+
+方括号可以后跟变量名，此外，它还能引用多词语的属性
+```
+let obj = {
+  name: 'liu',
+  age: 23,
+  'like things': 'apple'
+}
+
+obj['like things'] // 'apple'
+
+let l = 'like things'
+obj[l] // 'apple'
+```
+
+2.当我们需要定义一个动态`key`的属性时，我们使用计算属性
+```
+let sex = 'sex'
+
+let obj = {
+  name: 'liu',
+  age: 23,
+  [sex + ' is']: 'male',
+}
+
+obj['sex is'] // 'male'
+```
+
+3.在设置对象属性时，我们无法把`__proto__`的值设为非对象
+```
+let obj = {
+  name: 'liu',
+  age: 23,
+}
+
+obj.__proto__ = 5
+
+alert(obj.__proto__)  // [object Object]
+```
+
+4.判断属性是否存在对象中的方法
+
+- `in`，格式为左边是要判断的属性名，右边是操作对象，会查找原型链
+- `obj.hasOwnProperty`，继承的方法，判断对象本身是否存在某个属性，不查找原型链
+- 直接引用某个属性，看值是否为`undefined`，注意属性被赋值为`undefined`的情况
+
+```
+let obj = { name: 'aa' }
+
+obj.b // undefiend
+
+'name' in obj // true
+
+'toString' in obj // true
+
+obj.hasOwnProperty('toString') // false
+```
+
+5.遍历对象的方法
+
+- `for...in`，遍历对象自身的和继承的可枚举属性（不含Symbol属性）
+- `Object.keys`，遍历对象自身的可枚举属性（不含Symbol属性）
+- `Object.getOwnPropertyNames`，遍历自身的所有属性（不含Symbol属性）
+- `Object.getOwnPropertySymbols`，遍历自身所有的Symbol属性
+- `Reflect.ownKeys`，遍历对象自身的全部属性（包含Symbol属性）
+
+![对象遍历](./../img/basic_1.png)
+
+6.对象在遍历时对于属性并不都是按照定义的顺序来的，在遍历到一些可以被转化成数字的属性名时，会把它们提到前面并按从小到大的顺序遍历出来，然后再遍历其他属性
+```
+let obj = {
+  name: 'liu',
+  '0': 0,
+  '1': 1,
+}
+
+Object.keys(obj) // ['0', '1', 'name']
+```
+
+### 构造函数和操作符
+
+1.一个函数我们可以通过`new.target`属性来检查它是否被作为构造函数使用，如果是普通调用，值为`undefined`，否则指向构造函数本身
+```
+function Parent () {
+  this.name = 'liu'
+
+  console.log(new.target)
+}
+
+Parent() // undefined
+
+new Parent() // 打印函数本身
+```
+
+2.构造函数一般没有`return`值，如果显式指定返回，会根据值的类型决定要不要忽略，如果是对象，就返回这个对象；如果是原始类型，就忽略
+```
+function Parent (ctl) {
+  this.name = 'liu'
+
+  return ctl ? {} : 1
+}
+
+new Parent() // { name: 'liu' }
+
+new Parnet(1) // {}
+```
+
+3.对象提供了一对方法用来转换数组和对象，使得我们可以使用数组的方法处理对象然后返回一个处理后的对象
+```
+let obj = {
+  name: 1,
+  age: 2
+}
+
+Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, value * 2]))
+
+// 输出
+{
+  name: 2,
+  age: 4
+} 
+```
+
+## 数组
+
+1.JS中数组既可以充当队列`push, shift`，也可以充当栈`pop, push`，这样的数据结构在计算机中被称为双端队列
+
+2.JS对数组做了一些优化，比如将数组中的元素存储在连续的内存区域，但如果我们像对待常规对象一样对待数组，这些优化将被关闭，下面的几种方式都是不建议的：
+```
+let arr = []
+
+// 添加非数字属性
+arr.test = 'name'
+
+// 非连续赋值
+arr[0] = 1
+arr[10000] = 1
+
+// 分配的索引极大
+arr[10000000000000] = 1
+```
+
+3.操作数组末端的方法要比操作数组头部的方法性能要好，这是因为操作头部数据还需要额外的重新编号
+
+4.遍历数组的方式
+
+- `for (let i=0; i<arr.length; i++)`循环，运行最快，兼容最好
+- `forEach`，该方法会跳过数组中的空位
+- `for...in`，该方法不仅会遍历数字索引，还会遍历其他定义的属性，不建议使用
+- `for...of`，不获取索引，只获取每个元素的值
+
+5.拓展，求解数组中累加和最大的连续的子数组的最大和
+
+暴力解法，双重遍历，枚举出所有可能的子数组，求和，求最大值
+```
+function getMaxSubSum (arr) {
+  let max = 0
+  for (let i = 0; i < arr.length; i++) {
+    let tmp = 0
+    for (let j = i; j < arr.length; j++) {
+      tmp += arr[j]
+      max = Math.max(max, tmp)
+    }
+  }
+
+  return max >= 0 ? max : 0
+}
+```
+
+动态规划，状态转移方程为`dp[i] = max(dp[i - 1] + a[i], a[i])`
+```
+function getMaxSubSum (arr) {
+  let n = arr.length
+  let dp = [arr[0], ...Array(n - 1).fill(0)]
+  let max = dp[0]
+
+  for (let i = 1; i < n; i++) {
+    dp[i] = Math.max(dp[i - 1] + arr[i], arr[i])
+
+    max = Math.max(dp[i], max)
+  }
+
+  return max > 0 ? max : 0
+}
+```
+
+考虑到我们不需要记录中间子数组的和，我们只需要维护一个变量即可
+```
+function getMaxSubSum (arr) {
+  let max = 0
+  let tmp = 0
+
+  for (let i = 0; i < arr.length; i++) {
+    tmp += arr[i]
+    if (tmp < 0) tmp = 0
+
+    max = Math.max(tmp, max)
+  }
+
+  return max
+}
+```
+
+验证
+
+![最大子数组结果](./../img/basic_2.png)
+
+## 解构赋值
+
+1.数组的解构赋值会根据传入变量的个数，从`0`开始一一映射，如果要丢弃某个下标的值，只需要增加额外的逗号
+```
+let arr = [1, 2, 3, 4]
+
+let [one, two, , four] = arr // 1, 2, 4
+```
+
+实际上解构赋值更加强大，等号左边可以是任何可以被赋值的东西，而右边可以是任何可迭代对象
+```
+let [a, b, c] = 'abc'
+
+let obj = {}
+
+let [obj.name, obj.sub] = 'hello world'.split(' ')
+```
+
+2.我们可以使用`...`来拉取解构赋值的剩余部分
+```
+let [a, ...rest] = 'abcd'
+
+console.log(rest) // ['b', 'c', 'd']
+```
+
+3.我们可以给解构赋值的变量设置默认值，设置的值可以通过计算而来，只有在这个变量未被赋值的时候才会计算默认值
+```
+// 这里不会弹出对话框
+let [name = prompt('name?'), sub = 1 + 2] = ['ll']
+
+console.log(sub) // 3
+```
+
+4.解构赋值允许嵌套的情况
+```
+let obj = {
+  name: {
+    first: 'liu',
+    second: 'xiang',
+  }
+}
+
+let { name: { first, second } } = obj
+
+console.log(first) // 'liu'
+console.log(second) // 'xiang'
+```
