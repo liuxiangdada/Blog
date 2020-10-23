@@ -728,3 +728,249 @@ let { name: { first, second } } = obj
 console.log(first) // 'liu'
 console.log(second) // 'xiang'
 ```
+
+## JSON
+
+1.JS中的对象在正常情况下比如使用`toString`是无法看清楚其内部的属性值的，因为它被转化成如下的字符串
+```
+({ name: 'liu' }).toString() // [object Object]
+```
+
+这不利于进行传输或者再处理，有没有方法可以将对象映射为字符串呢，就像数组的`toString`方法会自动把各个元素用`,`连接成字符串一样，答案是`JSON.stringify`
+```
+let obj = {
+  a: {
+    b: 'c'
+  }
+}
+
+JSON.stringify(obj) // '{"a":{"b":"c"}}'
+```
+
+注意到属性名都被加上了双引号，我们再看看其他原始类型
+```
+let obj = {
+  name: 'liu',
+  age: 23,
+  married: false,
+  car: null,
+  house: undefined,
+  [Symbol('sex')]: 'male',
+  sayHi () {
+    alert('Hello')
+  }
+}
+
+JSON.stringify(obj) // '{"name":"liu","age":23,"married":false,"car":null}'
+```
+
+通过上面这个例子可以看出该方法的一些规则
+
+- 把属性名都用双引号包裹起来
+- 对属性值，只把字符串格式的值用双引号包裹
+- 跳过值为`undefined`和方法的属性
+- 跳过`Symbol`类型的属性
+
+2.`JSON.stringify`方法接收第二个参数用来控制转换的属性范围
+
+传入一个属性数组
+```
+let obj = {
+  name: 'liu',
+  age: 23,
+  married: false,
+  car: null,
+  house: undefined,
+  [Symbol('sex')]: 'male',
+  sayHi () {
+    alert('Hello')
+  }
+}
+
+JSON.stringify(obj, ['name']) // '{"name":"liu"}'
+```
+
+传入一个方法
+```
+let obj = {
+  a: {
+    b: 'c'
+  },
+  self: obj,
+  global: {
+    name: 'obj',
+    value: obj,
+  }
+}
+
+// 过滤循环引用
+JSON.stringify(obj, function (key, val) {
+  console.log(this)
+
+  return (key === 'self' || key === 'value') ? null : val
+})
+
+// 输出 {"a":{"b":"c"},"self":null,"global":{"name":"obj","value":null}}
+```
+
+上面我们在方法中打印`this`，可以很清楚的发现该方法会在属性递归遍历时被调用，调用时的`this`指向当前属性所属对象
+
+![JSON转换](./../img/basic_3.png)
+
+从结果中看出第一个调用很特殊，它的key是`""`，而值是传入的目标对象本身，这表明`stringify`方法会预处理目标对象，把它包裹到一个特殊的包装对象中，这么做的原因是让`replacer`方法有机会跳过整个对象
+
+3.其实`stringify`方法还支持第三个参数`spaces`，用于控制显示多行时对象的空格缩进情况，主要是记录日志和美化输出
+```
+let obj = {
+  a: {
+    b: 'c'
+  },
+}
+
+JSON.stringify(obj, null, 4)
+
+// 输出
+"{
+    "a": {
+        "b": "c"
+    }
+}"
+```
+
+4.对象可以自定义`toJSON`方法，这样`JSON.stringify`会优先调用它
+```
+let obj = {
+  time: new Date()
+}
+
+JSON.stringify(obj) // '{"time":"2020-10-23T01:58:36.823Z"}'
+```
+
+这里就是调用了`Date`类实例的内置`toJSON`方法把日期变成了一个字符串，我们自定义`toJSON`方法试试
+```
+let obj = {
+  name: 'liu',
+  sub: {
+    name: 'xiang',
+    toJSON() {
+      return 1
+    }
+  }
+}
+
+JSON.stringify(obj) // '{"name":"liu","sub":1}'
+```
+
+5.`parse`方法用于逆向解析`stringify`生成的`JSON`串，当然我们也可以手写，但手写容易引入错误，造成解析失败
+```
+let obj = {
+  name: 'liu'
+}
+
+JSON.parse(JSON.stringify(obj)) // {name: 'liu'}
+```
+
+`parse`方法支持传入第二个参数，和`stringify`一样，`reviver`接收匹配到的每一对键值对
+```
+let str = '{"title":"Conference","date":"2017-11-30T12:00:00.000Z"}';
+
+let meetup = JSON.parse(str); // 得到的date属性并不是`Date`类实例
+
+meetup = JSON.parse(str, (key, val) => {
+  if (key === 'date') return new Date(val)
+
+  return val
+})
+
+meetup.date.getDate() // 30
+```
+
+6.通常我们有深拷贝需求，如果不想自己重写一个深拷贝方法的话，可以像这样实现
+```
+let obj = {
+  name: 'liu',
+  sub : {
+    age: 23
+  }
+}
+
+let obj2 = JSON.parse(JSON.stringify(obj))
+
+obj2.name = 'haha'
+obj2.age = 24
+
+console.log(obj) // {name: 'liu', sub: { age: 23 }}
+```
+
+## Date
+
+1.创建日期使用`Date`内建对象，JS内置的`Date`构造函数十分强大
+
+不传参数，返回当前日期和时间的对象
+```
+let now = new Date()
+
+console.log(now) // Fri Oct 23 2020 10:39:18 GMT+0800 (中国标准时间)
+```
+
+传入整数，该整数表示自`1970-1-1 00:00:00`以来经过的毫秒数，允许负数，会往前推
+```
+let Jan01_1970 = new Date(0)
+
+console.log(Jan01_1970) // Thu Jan 01 1970 08:00:00 GMT+0800 (中国标准时间)
+
+let Dec31_1969 = new Date(-24 * 3600 * 1000)
+
+console.log(Dec31_1969) // Wed Dec 31 1969 08:00:00 GMT+0800 (中国标准时间)
+```
+
+传入字符串，该字符串会被自动解析，和`Date.parse`所使用的算法相同
+```
+let date = new Date('2010年11月12日') // Invalid Date
+
+let date2 = new Date('2010-11-12') // Fri Nov 12 2010 08:00:00 GMT+0800 (中国标准时间)
+```
+
+传入当前时区中给定组件，只有年份和月份是必须的其他都可以省略，默认填充初始值
+```
+new Date(year, month, date, hour, minutes, seconds, ms)
+```
+
+年份必须是四位的，月份从`0`开始计数，某天如果缺失，则设为`1`，其他项缺失默认值为`0`
+```
+let date = new Date (2010, 0) // Fri Jan 01 2010 00:00:00 GMT+0800 (中国标准时间)
+
+let date2 = new Date (2010, 0, 31, 13, 24, 1, 200) // Sun Jan 31 2010 13:24:01 GMT+0800 (中国标准时间)
+```
+
+2.获取`Date`对象中年月日的方法中有几个特殊事项
+
+- 获取年份最好使用`getFullYear`
+- 获取月份结果是从`0`开始的，这说明`0`代表1月
+- 获取星期`getDay`也是从`0`开始的，但`0`代表星期天
+- 获取一月中的某天使用`getDate`，该方法的方法名不够直观
+
+3.`Date`对象会自动校准输入值，这意味着我们可以输入超出范围的值，它会自动推导出正确的日期
+```
+let date = new Date(2013, 0, 32) // Fri Feb 01 2013 00:00:00 GMT+0800 (中国标准时间)
+
+date.setDate(date.getDate() + 29)
+
+console.log(date) // Sat Mar 02 2013 00:00:00 GMT+0800 (中国标准时间)
+```
+
+4.性能问题，虽然`Date`提供的大量的`API`，也能够智能的转化为字符串和数字，但我们在一些高性能场景要求使用更加高效的方法
+
+获取当前日期的毫秒数有几种方法
+```
+Date.now() // 性能最好，不用创建Date对象
+
++new Date() // 性能最差，需要类型转化
+
+new Date().getTime() // 中等
+```
+
+5.`Date.parse`方法被用来解析字符串，它接收`YYYY-MM-DDTHH:mm:ss.sssZ`的格式，`T`是分隔符，`Z`为可选字符，代表时区`UTC+0`，返回的是毫秒数
+```
+let date = Date.parse('2012-01-26T13:51:50:471-07:00') // 1327611110471
+```

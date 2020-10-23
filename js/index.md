@@ -28,4 +28,6 @@
 
 [JS基础知识盲区总结](./docs/js-check-basic.md)
 
+[JS函数基础](./docs/js-function.md)
 
+[JS闭包](./docs/js-closure.md)
