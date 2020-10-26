@@ -178,17 +178,22 @@ let obj = {
 
 ## 特殊的Date对象
 
-`Date`对象转字符串，其内部重载了`toString`方法，返回一个本地时间信息的字符串
+`Date`对象内部实现了`Symbol.toPrimitive`方法
+
+对于`string`和`default`类型的`hint`，返回一个本地时间信息的字符串
 
 ```
+new Date()[Symbol.toPrimitive]('string')
+new Date()[Symbol.toPrimitive]('default')
 String(new Date())
 
 // 结果
 "Thu Oct 15 2020 15:05:38 GMT+0800 (中国标准时间)"
 ```
 
-`Date`对象转数字，内部同样重载了`valueOf`方法，返回从`1970年1月1日`到目前的毫秒数
+对于`number`类型的`hint`，返回从`1970年1月1日`到目前的毫秒数
 ```
+new Date()[Symbol.toPrimitive]('number')
 +new Date('1970-01-01') // 0
 ```
 
