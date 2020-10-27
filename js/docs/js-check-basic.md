@@ -974,3 +974,270 @@ new Date().getTime() // 中等
 ```
 let date = Date.parse('2012-01-26T13:51:50:471-07:00') // 1327611110471
 ```
+
+## 调度
+
+1.JS实现调度在浏览器端有两个方法`setTimeout`和`setInterval`，这两个方法接收的参数一致，其中从第三个参数开始，表示传入调度函数的参数
+```
+function fn (...rest) {
+  console.log(rest)
+}
+
+setTimeout(fn, 1000, '1', 2, false) // 一秒后输出: ["1", 2, false]
+setInterval(fn, 1000, '1', 2, false) // 每隔一秒输出: ["1", 2, false]
+```
+
+2.如果要实现周期性调度，我们有两种方式，一种是使用嵌套的`setTimeout`，另一种是直接使用`setInterval`
+```
+let timer = setTimeout(function fn (a) {
+  console.log(a)
+
+  timer = setTimeout(fn, 1000, 1)
+}, 1000, 1)
+
+let timer = setInterval(function () {
+  console.log('haha')
+}, 1000)
+```
+
+这两者看起来是没有区别的，但实际上前者是等到执行完上一个回调后才重新设置一个新的定时器，它确保了下一次之心回调时时间间隔肯定大于设置的时间`delay`；而后者会在回调执行时就开始计数，这说明它包含了回调的执行时间，所以有可能执行的间隔比设置的延迟要短
+
+![定时器的区别1](./../img/basic_4.png)
+![定时器的区别2](./../img/basic_5.png)
+
+3.浏览器的任务执行流程是先执行主线程代码，然后检查回调，所以即使设置延时为`0`，定时器回调也不会马上执行，但在浏览器中还有一个规定，就是针对嵌套定时器，超过5层后，定时器的延时会被强制限制大于`4ms`
+
+![嵌套定时器的限制](./../img/basic_6.png)
+
+可以看到，即使设置为`0`，前面几次的时间也不是相同的，会有`2ms-3ms`的误差，而且从第四次开始，误差会大于`4ms`
+
+## 柯里化
+
+函数柯里化是一种高阶技巧，它不执行函数，而是处理函数，把多参数函数转化成更少参数的包装函数，以固化部分参数，简化调用时传入相同参数值的问题
+
+```
+function curry (func) {
+  return function curried (...args) {
+    if (args.length >= func.length) {
+      return func.apply(this, args)
+    } else {
+      return function (...args2) {
+        return curried.apply(this, args.concat(args2))
+      }
+    }
+  }
+}
+
+function sum (a, b, c) {
+  return a + b + c
+}
+
+let curriedSum = curry(sum)
+
+curriedSum(1, 2, 3) // still work, 6
+
+let f1 = curriedSum(1)
+let f2 = f1(2)
+f2(3) // 6
+```
+
+## 类
+
+1.`ES6`的类语法并没有重新实现像`Java`中的类这种结构，而是基于原型继承包装的语法糖，我们写一个类的语法，然后打印其类型，发现类本质上是函数对象
+```
+class Parent {
+  constructor (name) {
+    this.name = name
+  }
+
+  sayHi() { alert(this.name); }
+}
+
+typeof Parent // 'function'
+```
+
+继续验证，我们可以猜想类实际上在`new`时会创建一个同名函数，该函数内部的代码来自类定义的`constructor`方法，然后把函数自身指向这个函数的`prototype`上的`constructor`属性，最后往函数的`prototype`上添加类中定义的其他方法
+```
+Parent === Parent.prototype.constructor
+
+Parent.prototype.sayHi.apply({ name: 'liu' }) // 'liu'
+```
+
+2.更严谨一点，类不只是语法糖，它和我们原来的写法有几个区别
+
+- 类不允许使用除`new`之外的其他方式调用
+- 类中的方法被挂在其`prototype`上是不可枚举的
+- 使用类创建的函数具有特殊的内部属性标记`[[FunctionKind]]:"classConstructor"`
+- 我们在打印类时，结果中带有`class`前缀
+- 类内部使用严格模式执行代码
+
+3.类字段提供了一种解决`this丢失`更加优雅的方式，但注意兼容性
+```
+class Parent {
+  constructor (name) {
+    this.name = name
+  }
+
+  sayHi = () => {
+    console.log(this.name);
+  }
+
+  static print () {
+    console.log('print')
+  }
+}
+
+let p = new Parent('liu')
+
+setTimeout(p.sayHi, 1000) // 一秒后输出'liu'
+```
+
+4.类的继承使用`extends`，格式如下
+```
+class Child extends Parent {
+  // code
+}
+```
+
+`extends`内部的实现是修改函数原型的指向，在这个例子中修改为`Child.prototype = Parent.prototype`，接着修改函数的`__proto__`，`Child.__proto__ = Parent`，我们验证一下
+
+![类的继承](./../img/basic_7.png)
+
+5.如果要在派生类中重写基类的方法和构造器，可以使用`super`，在构造器中`super`指代基类构造函数
+```
+class Child extends Parent {
+  constructor () {
+    super(name) // 调用基类的构造函数
+  }
+}
+```
+
+**如果不先调用`super`方法，我们无法使用`this`并赋值派生类的属性**，这是因为在内部，对于普通函数，`new`操作符会创建一个空对象，并把它赋值给`this`，而在派生类的构造函数具有特殊的内部属性`[[ConstructorKind]]:"derived"`，它改变了`new`的行为，使得派生类的构造器不直接创建对象，而是指望基类的构造器去创建这个对象，所以如果在`super`之前调用`this`，无法找到正确的对象，产生报错
+
+在类的方法中，调用`super`指向基类的原型对象，我们可以通过`super.sayHi`的格式引用基类方法；在静态方法中，`super`的指向又变成了基类本身，要注意这个区别
+```
+class Child extends Parent {
+  constructor (name) {
+    super(name)
+  }
+
+  sayHi () {
+    super.sayHi()
+  }
+
+  static print () {
+    super.print()
+  }
+}
+```
+
+![类的继承2](./../img/basic_8.png)
+
+6.类内部的`super`机制是如何实现的呢，是向下面这样吗
+```
+let a = {
+  name: 'a',
+
+  print () {
+    console.log(this.name)
+  }
+}
+
+let b = {
+  name: 'b',
+  __proto__: a,
+  
+  print () {
+    this.__proto__.print.apply(this)
+  }
+}
+```
+
+我们测试一下，发现符合的很好
+```
+b.print() // 'b'
+```
+
+但如果我们再加一层
+```
+let c = {
+  name: 'c',
+  __proto__: b,
+  
+  print () {
+    this.__proto__.print.apply(this)
+  }
+}
+```
+
+执行，发现报错了
+
+![类的继承3](./../img/basic_9.png)
+
+这里的问题发生在`c`对象的`print`调用时，把`this`绑定为`c`对象本身了，即使通过`this.__proto__.print`找到`b`对象中的`print`方法，但执行时，`this`仍然是`c`，所以`print`方法的执行陷入了无限递归
+
+真正的JS的实现是给类中的方法指定了一个`[[HomeObject]]`属性，它永远指向该方法定义时所属的对象，这样我们就不需要使用`this`
+```
+let a = {
+  name: 'a',
+
+  print () {
+    console.log(this.name)
+  }
+}
+
+let b = {
+  name: 'b',
+  __proto__: a,
+  
+  print () {
+    super.print()
+  }
+}
+
+let c = {
+  name: 'c',
+  __proto__: b,
+  
+  print () {
+    super.print()
+  }
+}
+
+c.print() // 'c', work well
+```
+
+`super`有其使用限制，由于它硬性规定了函数的执行上下文，所以如果我们赋值该方法给一个变量时，它仍然会使用定义它的对象中的属性
+```
+let animal = {
+  sayHi() {
+    console.log(`I'm an animal`);
+  }
+};
+
+// rabbit 继承自 animal
+let rabbit = {
+  __proto__: animal,
+  sayHi() {
+    super.sayHi();
+  }
+};
+
+let plant = {
+  sayHi() {
+    console.log("I'm a plant");
+  }
+};
+
+// tree 继承自 plant
+let tree = {
+  __proto__: plant,
+  sayHi: rabbit.sayHi // (*)
+};
+
+tree.sayHi();  // I'm an animal (?!?)
+```
+
+可以看到，这是不对的，我们只是想复用一下`rabbit`对象的方法代码，却执行了`animal`对象的方法
+
+**此外，使用`super`必须是方法而不是函数属性，JS不会为函数属性指定`[[HomeObject]]`**

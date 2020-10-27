@@ -152,7 +152,7 @@ loader被用于转化模块，而plugin则用于一些更宽泛更复杂的任�
 
         const filePath = path.join(this.output.path, this.output.filename)
 
-        const bundle `(function (graph) {
+        const bundle = `(function (graph) {
           function require (module) {
             function localRequire (relativePath) {
               return require(graph[module].dependecies[relativePath])
