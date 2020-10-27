@@ -31,3 +31,5 @@
 [JS函数基础](./docs/js-function.md)
 
 [JS闭包](./docs/js-closure.md)
+
+[Proxy](./docs/js-proxy.md)

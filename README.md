@@ -35,6 +35,6 @@
 
 ## 工作
 
-[项目](./project/index.md)
+[项目](./work/index.md)
 
 

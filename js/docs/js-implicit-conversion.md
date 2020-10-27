@@ -75,7 +75,7 @@ Number(num) // 1
 
 由于对象在布尔上下文中表现均为`true`，所以我们不需要考虑`to-boolean`的转换
 
-对于字符串和数值的转换，对象内部有特殊的方法对对象进行微调，我们把转换的情况分为三类，称为`hint`，它在规范中有详细介绍
+对于字符串和数值的转换，对象内部有特殊的方法对对象进行微调，我们把转换的情况分为三类，称为`hint`，它在[规范](https://tc39.es/ecma262/#sec-toprimitive)中有详细介绍
 
 ### string
 
@@ -178,17 +178,22 @@ let obj = {
 
 ## 特殊的Date对象
 
-`Date`对象转字符串，其内部重载了`toString`方法，返回一个本地时间信息的字符串
+`Date`对象内部实现了`Symbol.toPrimitive`方法
+
+对于`string`和`default`类型的`hint`，返回一个本地时间信息的字符串
 
 ```
+new Date()[Symbol.toPrimitive]('string')
+new Date()[Symbol.toPrimitive]('default')
 String(new Date())
 
 // 结果
 "Thu Oct 15 2020 15:05:38 GMT+0800 (中国标准时间)"
 ```
 
-`Date`对象转数字，内部同样重载了`valueOf`方法，返回从`1970年1月1日`到目前的毫秒数
+对于`number`类型的`hint`，返回从`1970年1月1日`到目前的毫秒数
 ```
+new Date()[Symbol.toPrimitive]('number')
 +new Date('1970-01-01') // 0
 ```
 

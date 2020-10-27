@@ -19,3 +19,5 @@
 [旋转矩阵](./docs/offer-0107.md)
 
 [机器人的运动范围](./docs/offer-13.md)
+
+[数值的整数次方](./docs/offer-16.md)
