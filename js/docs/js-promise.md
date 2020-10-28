@@ -1,4 +1,4 @@
-### 原理
+## 原理
 
 Promise的本质是一种有限状态机，有三种状态，分别为pending、fulfilled、rejected，规定Promise默认处于pending状态，我们可以将其置为fulfilled或者rejected二者之一，状态只能从pending开始改变并且一旦改变便不可再更改
 
@@ -6,7 +6,7 @@ Promise被设计来处理异步问题，我们通常在定义时传入以两个�
 
 Promise之所以能够取代原有的回调函数模式，是因为其使得我们不必将回调函数写在异步操作内部，而是等到调用then方法的时候才传入回调，光这一点还不够，Promise所支持的链式调用和错误冒泡让我们可以将异步结果层层处理并统一处理错误
 
-### 实现
+## 实现
 
 通过Promises/A+规范，我们尝试着手写实现一个promise
 
@@ -476,3 +476,30 @@ promise.race = function(promises) {
   });
 };
 ```
+
+## 一个特殊的例子
+
+通过上面手写`Promise`，我们了解清楚了`Promise`是如何工作的，接下来我们看下面这个例子会输出什么
+```
+let p =  Promise.resolve(1).then(() => {
+  alert(1);
+
+  Promise.resolve(2).then(() => {
+    alert(2);
+  }).then(() => {
+    alert(3);
+  }).then(() => {
+    alert(4);
+  })
+
+  alert(5);
+}).then(function (result) {
+  alert(6);
+}).then(function (result) {
+  alert(7);
+});
+```
+
+答案是`1, 5, 2, 6, 3, 7, 4`，出乎意料对吗，我们试着分析一下，一开始定义了一个`Promise`，它的状态为`fulfilled`，所以第一个`then`的回调会放入微任务队列中，后面的`then`由于依赖前面的`then`的返回结果，所以状态仍为`pending`，所以不加入微任务队列
+
+执行栈为空后，从微任务队列取出第一个`then`的回调，执行出结果`1`，接着又碰到`Promise`，和上面一样，这时又把第一个`then`的回调放入微任务队列，后面的不加入，接着输出`5`，等到执行完当前回调后，`resolve`了一个空值，这时，外部的第二个`then`的回调被加入微任务队列，我们继续执行微任务队列，碰到内部的第一个回调，输出`2`，然后加入内部的第二个回调，继续执行微任务队列，输出`6`，如此反复，最终输出`3, 7, 4`
